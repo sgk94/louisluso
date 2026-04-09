@@ -1,5 +1,6 @@
 .env
 node_modules/
+.next/
 
 # Email automation state (contains contact data)
 email/contacts.json
