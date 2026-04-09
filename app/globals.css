@@ -1,1 +1,19 @@
 @import "tailwindcss";
+
+@theme {
+  --color-bronze: #8B6F4E;
+  --color-bronze-light: #C4A882;
+  --color-off-white: #FAFAF9;
+  --color-warm-bg: #F0ECE6;
+
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
+}
+
+body {
+  font-family: var(--font-body), system-ui, sans-serif;
+  color: #1A1A1A;
+  background: #FFFFFF;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
