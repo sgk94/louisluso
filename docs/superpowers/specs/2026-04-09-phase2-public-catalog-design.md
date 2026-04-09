@@ -278,16 +278,36 @@ Zoho Inventory                    SRP26 Price Book
 
 ## Setup Prerequisites (before implementation)
 
-### 1. Create SRP26 Price Book
+### 1. Zoho Price Update & SRP26 Setup Script
 
-Script to run once:
+Single setup script (`scripts/setup-srp26.ts`) that runs once:
 
+**Step 1 — Backup current rates**
+1. Fetch all item groups with variants from Zoho
+2. Export to `scripts/data/zoho-rates-backup-2026-04-09.json` — every item with its current `rate`, `item_id`, `group_name`, `sku`
+3. This is a safety net — if anything goes wrong, we have exact pre-update values to restore from
+
+**Step 2 — Update list prices to 2026 values**
+Several collections have stale rates in Zoho (Eye Cloud $54→$57, Veritas $49→$51, LL Ti L-800 $84→$89, etc.). Update each item's `rate` to match the 2026 price sheet, mapped by collection.
+
+Mismatched collections found:
+| Collection | Zoho Current | 2026 Sheet |
+|---|---|---|
+| Eye Cloud | $54 | $57 |
+| Classic | $50-65 (mixed) | $65 |
+| Veritas | $49 | $51 |
+| LL Ti L-800 | $84 | $89 |
+| LL Ti L-5000 | $85-108 (mixed) | $108 |
+| Tandy | $84-86 (mixed) | $84 |
+
+**Step 3 — Create SRP26 price book**
 1. `POST /inventory/v1/pricebooks` — create "SRP26" price book (type: `per_item`, sales)
-2. Fetch all item groups from Zoho
-3. Map each item to its collection via SKU prefix/brand
-4. Look up SRP from the 2026 price table
-5. Set each variant's price in the SRP26 price book
-6. Log items with TBD SRP (TANI, Manomos, Close Out, Accessories) for later manual entry
+2. Map each item to its collection via SKU prefix/brand
+3. Look up SRP from the 2026 price table
+4. Set each variant's price in the SRP26 price book
+5. Log items with TBD SRP (TANI, Manomos, Close Out, Accessories) for later manual entry
+
+All three steps run with `--dry-run` support to preview changes before applying.
 
 ### 2. Fix Price Book API Path
 
