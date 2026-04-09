@@ -1,5 +1,6 @@
 // scripts/setup-srp26.ts
-import "dotenv/config";
+import { config } from "dotenv";
+config({ path: ".env.local" });
 import { getItemGroups, getPriceBooks } from "../lib/zoho/inventory";
 import { getAccessToken } from "../lib/zoho/auth";
 import { matchCollection } from "../lib/catalog/collections";
@@ -120,14 +121,23 @@ async function main(): Promise<void> {
       continue;
     }
 
-    const expectedListPrice = LIST_PRICES_2026[collection.slug];
-    const srpPrice = SRP_2026[collection.slug];
-
     for (const item of group.items ?? []) {
+      // London Collection has two tiers: standard ($81/$243) and titanium ($97/$290)
+      // Detect titanium by current rate ($97) before we update anything
+      const isLondonTitanium =
+        collection.slug === "london-collection" && item.rate === 97;
+
+      const expectedListPrice = isLondonTitanium
+        ? 97
+        : LIST_PRICES_2026[collection.slug];
+      const srpPrice = isLondonTitanium
+        ? 290
+        : SRP_2026[collection.slug];
+
       // Check if list price needs updating
       if (expectedListPrice && item.rate !== expectedListPrice) {
         console.log(
-          `UPDATE LIST: ${item.name} rate ${item.rate} → ${expectedListPrice} (${collection.name})`,
+          `UPDATE LIST: ${item.name} rate ${item.rate} → ${expectedListPrice} (${collection.name}${isLondonTitanium ? " Titanium" : ""})`,
         );
         if (!DRY_RUN) {
           await zohoPut(`/inventory/v1/items/${item.item_id}`, {
