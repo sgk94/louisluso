@@ -552,6 +552,8 @@ Most security is delegated to trusted services, but our application layer must b
 | Connect Stripe to Zoho Books | Ken | Pending (after Zoho One migration) |
 | Zoho One migration (via sales rep) | Ken | Pending (Enterprise Trial active) |
 | Provide design reference sites | Shawn | Done (Persol, Edward Beiner, SEE, Gentle Monster, Oliver Peoples) |
+| Create SRP26 price book in Zoho Inventory | Shawn | Done (2026-04-09, id: 3278693000026409389, 698 items) |
+| Update Zoho list prices to 2026 values | Shawn | Done (2026-04-09, 195 items updated, backup at scripts/data/) |
 
 ---
 

@@ -3,7 +3,7 @@
 ## About
 E-commerce eyewear retailer (B2B wholesale to optical stores + B2C catalog). Domain registered through Bluehost, hosted on AWS (being migrated to Vercel).
 
-## New Website (in progress — Phase 1 complete)
+## New Website (in progress — Phase 2 complete)
 Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpowers/specs/2026-04-08-louisluso-website-redesign.md` for full spec.
 
 ### Stack
@@ -18,7 +18,7 @@ Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpower
 - **Icons:** Heroicons
 - **Newsletter:** Zoho Campaigns
 - **Email:** Gmail API (cs@louisluso.com)
-- **Testing:** Vitest, React Testing Library (48 tests)
+- **Testing:** Vitest, React Testing Library (89 tests)
 - **Package Manager:** pnpm
 
 ### Project Structure (new site files)
@@ -26,9 +26,15 @@ Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpower
 - `lib/env.ts` — Zod-validated environment variables (lazy Proxy)
 - `lib/zoho/auth.ts` — Zoho OAuth2 token management with deduplication
 - `lib/zoho/client.ts` — Base HTTP client (auto-detects product, sets correct org header)
-- `lib/zoho/inventory.ts` — Zoho Inventory API (items, groups, price lists)
+- `lib/zoho/inventory.ts` — Zoho Inventory API (items, groups, price books)
 - `lib/zoho/books.ts` — Zoho Books API (sales orders, invoices)
 - `lib/zoho/crm.ts` — Zoho CRM API (leads, contacts, file attachments)
+- `lib/catalog/collections.ts` — Static collection config (21 collections, SKU prefix/brand matching)
+- `lib/catalog/catalog.ts` — Catalog data layer (Zoho items + SRP26 pricing merge, React.cache wrapped)
+- `lib/catalog/sku-parser.ts` — Parse color names and dimensions from Zoho SKU text
+- `lib/catalog/types.ts` — Shared catalog types (CatalogProduct, CatalogVariant, etc.)
+- `lib/catalog/images.ts` — Product image URL helper (placeholder, ready for Cloudinary)
+- `lib/catalog/format.ts` — Price formatting (Intl.NumberFormat)
 - `lib/rate-limit.ts` — Upstash rate limiter
 - `proxy.ts` — Clerk middleware (protects /portal routes)
 - `__tests__/` — Vitest test files
@@ -37,8 +43,8 @@ Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpower
 
 ### Phases
 1. **Foundation** — COMPLETE (scaffold, Zoho APIs, Clerk auth, rate limiting, Vercel deploy)
-2. **Public Catalog** — next (products from Zoho Inventory + Cloudinary)
-3. **Static Pages** — homepage, about, contact, become a partner, nav/footer
+2. **Public Catalog** — COMPLETE (collection pages, product grids, product detail, SRP26 pricing, SKU parsing, 245 SSG pages)
+3. **Static Pages** — next (homepage, about, contact, become a partner, nav/footer)
 4. **Dealer Locator** — Mapbox, CRM dealers, "Contact This Dealer" email
 5. **B2B Portal** — bespoke pricing, cart, quote/order, order history, favorites
 6. **Polish & Launch** — GA4, image migration, DNS cutover, WordPress retirement
