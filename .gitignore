@@ -1,0 +1,10 @@
+.env
+node_modules/
+
+# Email automation state (contains contact data)
+email/contacts.json
+email/state.json
+email/send-log.json
+email/sent-log.jsonl
+email/credentials.json
+email/token.json

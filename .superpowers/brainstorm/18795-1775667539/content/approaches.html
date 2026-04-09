@@ -1,0 +1,96 @@
+<h2>Three Approaches for louisluso.com</h2>
+<p class="subtitle">Pick the architecture that fits your needs</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)" style="border-left: 4px solid #22c55e;">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Next.js + Zoho APIs (Recommended)</h3>
+      <p style="margin-bottom: 12px;">Custom-built Next.js site on Vercel. Server-side routes proxy all Zoho API calls (Inventory, Books, CRM). Clerk handles auth. Full control over every pixel.</p>
+      <div style="display: flex; gap: 24px; font-size: 14px;">
+        <div>
+          <strong style="color: #22c55e;">Pros</strong>
+          <ul style="margin: 4px 0; padding-left: 16px;">
+            <li>Full design control — no theme limitations</li>
+            <li>Best performance (SSR + edge caching)</li>
+            <li>Your stack (Next.js, TypeScript, Vercel)</li>
+            <li>Zoho is just a data source — easy to swap later</li>
+            <li>B2B portal is custom-built exactly how you want</li>
+          </ul>
+        </div>
+        <div>
+          <strong style="color: #ef4444;">Cons</strong>
+          <ul style="margin: 4px 0; padding-left: 16px;">
+            <li>Most development effort upfront</li>
+            <li>You maintain all the integration code</li>
+            <li>Zoho API rate limits need caching strategy</li>
+          </ul>
+        </div>
+      </div>
+      <p style="margin-top: 8px; font-size: 13px; color: #888;"><strong>New monthly cost:</strong> ~$23/mo (Vercel + DNS)</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Zoho Commerce Storefront</h3>
+      <p style="margin-bottom: 12px;">Use Zoho's own e-commerce platform as the website. Native integration with Books, Inventory, CRM. Hosted by Zoho.</p>
+      <div style="display: flex; gap: 24px; font-size: 14px;">
+        <div>
+          <strong style="color: #22c55e;">Pros</strong>
+          <ul style="margin: 4px 0; padding-left: 16px;">
+            <li>Zero integration code — everything is native</li>
+            <li>Fastest to launch</li>
+            <li>Ken manages everything from one Zoho dashboard</li>
+            <li>Built-in cart, checkout, order management</li>
+          </ul>
+        </div>
+        <div>
+          <strong style="color: #ef4444;">Cons</strong>
+          <ul style="margin: 4px 0; padding-left: 16px;">
+            <li>Limited design flexibility (theme-based)</li>
+            <li>No custom B2B portal with bespoke pricing</li>
+            <li>No Clerk — stuck with Zoho's auth</li>
+            <li>Hard to customize dealer locator, quote flows</li>
+            <li>Another monthly fee ($25-100/mo)</li>
+          </ul>
+        </div>
+      </div>
+      <p style="margin-top: 8px; font-size: 13px; color: #888;"><strong>New monthly cost:</strong> ~$25-100/mo (Zoho Commerce plan)</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Hybrid: Next.js Frontend + Zoho Commerce Backend</h3>
+      <p style="margin-bottom: 12px;">Use Zoho Commerce's API as a headless backend for products/orders, but build a custom Next.js frontend for full design control.</p>
+      <div style="display: flex; gap: 24px; font-size: 14px;">
+        <div>
+          <strong style="color: #22c55e;">Pros</strong>
+          <ul style="margin: 4px 0; padding-left: 16px;">
+            <li>Design freedom of Option A</li>
+            <li>Commerce handles order/payment logic</li>
+            <li>Native Zoho ecosystem sync</li>
+          </ul>
+        </div>
+        <div>
+          <strong style="color: #ef4444;">Cons</strong>
+          <ul style="margin: 4px 0; padding-left: 16px;">
+            <li>Zoho Commerce API is limited vs Inventory/Books APIs</li>
+            <li>Paying for both Vercel AND Zoho Commerce</li>
+            <li>Two systems to manage — worst of both worlds</li>
+            <li>Still can't do bespoke B2B pricing natively</li>
+          </ul>
+        </div>
+      </div>
+      <p style="margin-top: 8px; font-size: 13px; color: #888;"><strong>New monthly cost:</strong> ~$45-120/mo (Vercel + Zoho Commerce + DNS)</p>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 24px; padding: 16px; background: rgba(34, 197, 94, 0.08); border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.2);">
+  <h3 style="margin: 0 0 8px 0; color: #22c55e;">My Recommendation: Option A</h3>
+  <p style="margin: 0; font-size: 14px;">You need a custom B2B portal with per-account pricing, a dealer locator pulling from CRM, a "Contact Dealer" email flow, and full design control. Zoho Commerce can't do most of that without heavy workarounds. Option A gives you exactly what you need, costs the least monthly, and uses the stack you already know. The extra upfront dev work pays for itself in flexibility.</p>
+</div>

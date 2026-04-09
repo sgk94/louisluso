@@ -1,0 +1,90 @@
+<h2>Architecture Overview</h2>
+<p class="subtitle">How the pieces fit together</p>
+
+<div class="mockup">
+  <div class="mockup-header">System Architecture</div>
+  <div class="mockup-body" style="padding: 24px; font-family: monospace; font-size: 13px; line-height: 1.8;">
+    <div style="text-align: center; margin-bottom: 24px;">
+      <div style="display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
+        <div style="padding: 10px 16px; background: #dbeafe; border-radius: 6px; border: 1px solid #93c5fd;">
+          <strong>Public Visitor</strong><br><span style="font-size: 11px;">Browse catalog, SRP prices<br>Find dealer, contact dealer</span>
+        </div>
+        <div style="padding: 10px 16px; background: #dcfce7; border-radius: 6px; border: 1px solid #86efac;">
+          <strong>B2B Store (logged in)</strong><br><span style="font-size: 11px;">Bespoke pricing, build quotes<br>Order history, account mgmt</span>
+        </div>
+        <div style="padding: 10px 16px; background: #fef3c7; border-radius: 6px; border: 1px solid #fcd34d;">
+          <strong>Ken (Admin)</strong><br><span style="font-size: 11px;">Approve partners, manage<br>orders via Zoho dashboard</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align: center; font-size: 20px; color: #888;">▼ ▼ ▼</div>
+
+    <div style="text-align: center; margin: 16px 0;">
+      <div style="display: inline-block; padding: 14px 24px; background: #1e293b; color: #fff; border-radius: 8px;">
+        <strong style="font-size: 15px;">Next.js on Vercel</strong><br>
+        <span style="font-size: 11px; color: #94a3b8;">React frontend + API routes (serverless)</span>
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: center; gap: 8px; margin: 8px 0;">
+      <div style="padding: 6px 12px; background: #f1f5f9; border-radius: 4px; font-size: 11px;">SSR/ISR pages</div>
+      <div style="padding: 6px 12px; background: #f1f5f9; border-radius: 4px; font-size: 11px;">API routes → Zoho</div>
+      <div style="padding: 6px 12px; background: #f1f5f9; border-radius: 4px; font-size: 11px;">Clerk middleware</div>
+      <div style="padding: 6px 12px; background: #f1f5f9; border-radius: 4px; font-size: 11px;">Stripe webhooks</div>
+    </div>
+
+    <div style="text-align: center; font-size: 20px; color: #888; margin: 12px 0;">▼ ▼ ▼</div>
+
+    <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
+      <div style="padding: 12px 16px; background: #fef2f2; border-radius: 6px; border: 1px solid #fca5a5; text-align: center;">
+        <strong>Zoho Inventory</strong><br><span style="font-size: 11px;">Products, variants<br>stock levels, images</span>
+      </div>
+      <div style="padding: 12px 16px; background: #f0fdf4; border-radius: 6px; border: 1px solid #86efac; text-align: center;">
+        <strong>Zoho Books</strong><br><span style="font-size: 11px;">Invoices, payments<br>accounting, reports</span>
+      </div>
+      <div style="padding: 12px 16px; background: #eff6ff; border-radius: 6px; border: 1px solid #93c5fd; text-align: center;">
+        <strong>Zoho CRM</strong><br><span style="font-size: 11px;">Dealer contacts<br>partner applications</span>
+      </div>
+      <div style="padding: 12px 16px; background: #faf5ff; border-radius: 6px; border: 1px solid #c4b5fd; text-align: center;">
+        <strong>Clerk</strong><br><span style="font-size: 11px;">B2B auth, sessions<br>role-based access</span>
+      </div>
+      <div style="padding: 12px 16px; background: #f5f3ff; border-radius: 6px; border: 1px solid #a78bfa; text-align: center;">
+        <strong>Stripe</strong><br><span style="font-size: 11px;">Payment processing<br>via Zoho invoice links</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 24px;">
+  <h3>Key Data Flows</h3>
+
+  <div style="display: grid; gap: 12px; margin-top: 12px;">
+    <div style="padding: 12px 16px; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
+      <strong>1. Product Catalog</strong><br>
+      <span style="font-size: 14px;">Zoho Inventory → Next.js API route → ISR cached pages (revalidate every ~15 min)<br>
+      <em style="color: #888;">Public sees SRP. Logged-in stores see bespoke pricing from Clerk metadata or CRM lookup.</em></span>
+    </div>
+
+    <div style="padding: 12px 16px; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
+      <strong>2. B2B Quote/Order</strong><br>
+      <span style="font-size: 14px;">Store builds cart → submits order → API route creates Sales Order in Zoho Books → Ken reviews → converts to Invoice with payment link → store pays via Stripe</span>
+    </div>
+
+    <div style="padding: 12px 16px; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
+      <strong>3. Dealer Locator</strong><br>
+      <span style="font-size: 14px;">Zoho CRM (active dealer contacts with addresses) → API route → map with geolocation search<br>
+      <em style="color: #888;">"Contact This Dealer" sends email with product info + customer contact details.</em></span>
+    </div>
+
+    <div style="padding: 12px 16px; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
+      <strong>4. Become a Partner</strong><br>
+      <span style="font-size: 14px;">Form submission → API route creates Lead in Zoho CRM → Ken reviews → approves → Clerk account created → welcome email with login</span>
+    </div>
+
+    <div style="padding: 12px 16px; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
+      <strong>5. Inventory Sync</strong><br>
+      <span style="font-size: 14px;">Zoho Inventory is source of truth. Website caches product data via ISR. Stock changes in Zoho reflect on site within ~15 min. No more WooCommerce stock scripts.</span>
+    </div>
+  </div>
+</div>

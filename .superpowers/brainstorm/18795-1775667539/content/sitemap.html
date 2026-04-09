@@ -1,0 +1,87 @@
+<h2>Sitemap & Page Breakdown</h2>
+<p class="subtitle">Every page on the new site — carried over from current site + new features</p>
+
+<div style="display: grid; gap: 16px;">
+
+  <div style="padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+    <h3 style="margin: 0 0 4px 0;">Public Pages (no login required)</h3>
+    <div style="display: grid; gap: 8px; margin-top: 12px; font-size: 14px;">
+      <div style="padding: 8px 12px; background: rgba(59,130,246,0.08); border-radius: 4px;">
+        <strong>/</strong> — Homepage<br>
+        <span style="color: #888;">Hero banner, collection showcases, brand intro, CTA to browse or become a partner</span>
+      </div>
+      <div style="padding: 8px 12px; background: rgba(59,130,246,0.08); border-radius: 4px;">
+        <strong>/collections</strong> — All Collections<br>
+        <span style="color: #888;">Grid of collection cards (Classic, Junior, Signature, London, Milan, Urban, Skylite, etc.)</span>
+      </div>
+      <div style="padding: 8px 12px; background: rgba(59,130,246,0.08); border-radius: 4px;">
+        <strong>/collections/[slug]</strong> — Collection Page<br>
+        <span style="color: #888;">Product grid for a specific collection. Filters by color. Shows SRP pricing.</span>
+      </div>
+      <div style="padding: 8px 12px; background: rgba(59,130,246,0.08); border-radius: 4px;">
+        <strong>/products/[slug]</strong> — Product Detail<br>
+        <span style="color: #888;">Product images, color variants, SRP price, specs (material, size, weight). "Find Nearest Dealer" button. Logged-in B2B users see bespoke pricing + "Add to Quote" button.</span>
+      </div>
+      <div style="padding: 8px 12px; background: rgba(59,130,246,0.08); border-radius: 4px;">
+        <strong>/why-louisluso</strong> — Why LOUISLUSO?<br>
+        <span style="color: #888;">ULTEM material info, FDA/ECO compliance, brand differentiation</span>
+      </div>
+      <div style="padding: 8px 12px; background: rgba(59,130,246,0.08); border-radius: 4px;">
+        <strong>/about</strong> — About Us<br>
+        <span style="color: #888;">Mission, vision, values, company story</span>
+      </div>
+      <div style="padding: 8px 12px; background: rgba(59,130,246,0.08); border-radius: 4px;">
+        <strong>/find-a-dealer</strong> — Dealer Locator<br>
+        <span style="color: #888;">Map with address/radius search. Pulls active dealers from Zoho CRM. "Contact This Dealer" sends email with product info + customer details.</span>
+      </div>
+      <div style="padding: 8px 12px; background: rgba(59,130,246,0.08); border-radius: 4px;">
+        <strong>/become-a-partner</strong> — Partnership Application<br>
+        <span style="color: #888;">Form: company, contact name, email, phone, address. Submits to Zoho CRM as a Lead.</span>
+      </div>
+      <div style="padding: 8px 12px; background: rgba(59,130,246,0.08); border-radius: 4px;">
+        <strong>/contact</strong> — Contact Us<br>
+        <span style="color: #888;">Contact form + Google Maps embed (Q-Vision Optics, Arlington Heights, IL)</span>
+      </div>
+      <div style="padding: 8px 12px; background: rgba(59,130,246,0.08); border-radius: 4px;">
+        <strong>/appointment</strong> — Book an Appointment<br>
+        <span style="color: #888;">Date/time picker for scheduling a meeting with Ken</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px solid rgba(34,197,94,0.3);">
+    <h3 style="margin: 0 0 4px 0; color: #22c55e;">B2B Portal (login required — Clerk)</h3>
+    <div style="display: grid; gap: 8px; margin-top: 12px; font-size: 14px;">
+      <div style="padding: 8px 12px; background: rgba(34,197,94,0.08); border-radius: 4px;">
+        <strong>/portal</strong> — Dashboard<br>
+        <span style="color: #888;">Welcome screen, recent orders, account summary, quick actions</span>
+      </div>
+      <div style="padding: 8px 12px; background: rgba(34,197,94,0.08); border-radius: 4px;">
+        <strong>/portal/catalog</strong> — B2B Catalog<br>
+        <span style="color: #888;">Same products but with bespoke wholesale pricing. "Add to Quote" cart functionality with count badge.</span>
+      </div>
+      <div style="padding: 8px 12px; background: rgba(34,197,94,0.08); border-radius: 4px;">
+        <strong>/portal/quote</strong> — Current Quote / Cart<br>
+        <span style="color: #888;">Review items, quantities, bespoke pricing. Submit as order → creates Sales Order in Zoho Books.</span>
+      </div>
+      <div style="padding: 8px 12px; background: rgba(34,197,94,0.08); border-radius: 4px;">
+        <strong>/portal/orders</strong> — Order History<br>
+        <span style="color: #888;">Past orders, invoice status, payment status. Pulled from Zoho Books.</span>
+      </div>
+      <div style="padding: 8px 12px; background: rgba(34,197,94,0.08); border-radius: 4px;">
+        <strong>/portal/account</strong> — Account Settings<br>
+        <span style="color: #888;">Company info, shipping address, contact details. Managed via Clerk + synced to Zoho CRM.</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+    <h3 style="margin: 0 0 4px 0;">Carried Over (from current site)</h3>
+    <div style="font-size: 14px; margin-top: 8px; color: #888;">
+      <p style="margin: 4px 0;"><strong>Kept:</strong> Homepage, About, Why LOUISLUSO, Contact, Store Locator (→ Find a Dealer), Apply for Partnership (→ Become a Partner), Collections, Products, Appointment, Wishlist concept</p>
+      <p style="margin: 4px 0;"><strong>Dropped:</strong> WooCommerce cart/checkout (replaced by B2B quote flow), Quote Request page (was broken), Instruction page (old/empty), Slide Banners page (internal/utility)</p>
+      <p style="margin: 4px 0;"><strong>New:</strong> B2B Portal (dashboard, wholesale catalog, quote builder, order history), Contact This Dealer email flow, Privacy Policy, Terms</p>
+    </div>
+  </div>
+
+</div>

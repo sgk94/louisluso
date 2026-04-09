@@ -1,0 +1,27 @@
+{
+  "name": "louisluso",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "update-stock": "tsx update-stock.ts",
+    "email:send": "tsx email/cli-send.ts",
+    "email:import": "tsx email/cli-import.ts",
+    "email:enroll": "tsx email/cli-enroll.ts",
+    "email:sequence": "tsx email/cli-sequence.ts",
+    "email:blast": "tsx email/campaigns/new-collection-blast.ts",
+    "email:auth": "tsx email/cli-auth.ts",
+    "email:import-sheets": "tsx email/cli-import-sheets.ts"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "googleapis": "^171.4.0",
+    "nodemailer": "^6.9.16",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^6.4.17",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  },
+  "packageManager": "pnpm@10.18.3+sha512.bbd16e6d7286fd7e01f6b3c0b3c932cda2965c06a908328f74663f10a9aea51f1129eea615134bf992831b009eabe167ecb7008b597f40ff9bc75946aadfb08d"
+}

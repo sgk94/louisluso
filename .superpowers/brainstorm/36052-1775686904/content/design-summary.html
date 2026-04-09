@@ -1,0 +1,134 @@
+<h2>Design Summary — New louisluso.com</h2>
+<p class="subtitle">Full picture before we write the spec</p>
+
+<div style="display: grid; gap: 16px;">
+
+  <!-- Stack -->
+  <div style="padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+    <h3 style="margin: 0 0 8px 0;">Stack</h3>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap; font-size: 13px;">
+      <span style="padding: 4px 10px; background: #1e293b; border-radius: 4px; color: #e2e8f0;">Next.js</span>
+      <span style="padding: 4px 10px; background: #1e293b; border-radius: 4px; color: #e2e8f0;">TypeScript</span>
+      <span style="padding: 4px 10px; background: #1e293b; border-radius: 4px; color: #e2e8f0;">Vercel</span>
+      <span style="padding: 4px 10px; background: #1e293b; border-radius: 4px; color: #e2e8f0;">Clerk</span>
+      <span style="padding: 4px 10px; background: #1e293b; border-radius: 4px; color: #e2e8f0;">Zoho One</span>
+      <span style="padding: 4px 10px; background: #1e293b; border-radius: 4px; color: #e2e8f0;">Stripe</span>
+    </div>
+  </div>
+
+  <!-- Monthly Cost -->
+  <div style="padding: 16px; background: rgba(34,197,94,0.06); border-radius: 8px; border: 1px solid rgba(34,197,94,0.2);">
+    <h3 style="margin: 0 0 8px 0;">Monthly Cost</h3>
+    <div style="font-size: 14px;">
+      <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <span>Zoho One (2 users, annual)</span><span>~$70/mo</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <span>Vercel Pro</span><span>$20/mo</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <span>Clerk</span><span>$0</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <span>Stripe</span><span>2.9% + $0.30/txn</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <span>Domain/DNS</span><span>~$3/mo</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; padding: 8px 0 0 0; font-weight: bold;">
+        <span>Total</span><span>~$93/mo + Stripe fees</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Public Pages -->
+  <div style="padding: 16px; background: rgba(59,130,246,0.06); border-radius: 8px; border: 1px solid rgba(59,130,246,0.2);">
+    <h3 style="margin: 0 0 8px 0;">Public Pages</h3>
+    <div style="font-size: 14px; display: grid; gap: 4px;">
+      <div><strong>/</strong> — Homepage (hero, collections, brand intro)</div>
+      <div><strong>/eyeglasses</strong> — Eyeglasses category (collection grid)</div>
+      <div><strong>/eyeglasses/[collection]</strong> — Collection products</div>
+      <div><strong>/sunglasses</strong> — Sunglasses category</div>
+      <div><strong>/sunglasses/[collection]</strong> — Collection products</div>
+      <div><strong>/accessories</strong> — Accessories</div>
+      <div><strong>/products/[slug]</strong> — Product detail (SRP, variants, images, "Find Nearest Dealer")</div>
+      <div><strong>/why-louisluso</strong> — ULTEM material, FDA/ECO compliance</div>
+      <div><strong>/about</strong> — Mission, vision, values</div>
+      <div><strong>/find-a-dealer</strong> — Map + search + "Contact This Dealer" email flow</div>
+      <div><strong>/become-a-partner</strong> — Application form → Zoho CRM Lead</div>
+      <div><strong>/contact</strong> — Form + Google Maps</div>
+      <div><strong>/appointment</strong> — Date/time booking</div>
+      <div><strong>/privacy</strong> — Privacy policy</div>
+      <div><strong>/terms</strong> — Terms of service</div>
+    </div>
+  </div>
+
+  <!-- B2B Portal -->
+  <div style="padding: 16px; background: rgba(34,197,94,0.06); border-radius: 8px; border: 1px solid rgba(34,197,94,0.2);">
+    <h3 style="margin: 0 0 8px 0;">B2B Portal (Clerk login required)</h3>
+    <div style="font-size: 14px; display: grid; gap: 4px;">
+      <div><strong>/portal</strong> — Dashboard (recent orders, account summary)</div>
+      <div><strong>/portal/catalog</strong> — Wholesale catalog (bespoke pricing per account)</div>
+      <div><strong>/portal/quote</strong> — Cart / quote builder (count badge on cart icon)</div>
+      <div><strong>/portal/orders</strong> — Order history + reorder from past orders</div>
+      <div><strong>/portal/favorites</strong> — Saved favorite products</div>
+      <div><strong>/portal/account</strong> — Company info, shipping, contacts</div>
+    </div>
+  </div>
+
+  <!-- Key Flows -->
+  <div style="padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+    <h3 style="margin: 0 0 8px 0;">Key Flows</h3>
+    <div style="font-size: 14px; display: grid; gap: 12px;">
+      <div>
+        <strong>B2B Order:</strong><br>
+        <span style="color: #888;">Login → browse catalog (bespoke pricing) → add to cart → review quote → submit → Sales Order in Zoho Books → Ken reviews → converts to Invoice with payment link → store pays via Stripe</span>
+      </div>
+      <div>
+        <strong>Contact Dealer:</strong><br>
+        <span style="color: #888;">Customer on product page → "Find Nearest Dealer" → map search → "Contact This Dealer" → form (name, email, message) → email sent to dealer with product info + customer details → CC to admin@ and cs@louisluso.com</span>
+      </div>
+      <div>
+        <strong>Become a Partner:</strong><br>
+        <span style="color: #888;">Form → Lead in Zoho CRM → Ken reviews → approves → Clerk account created → welcome email with login credentials</span>
+      </div>
+      <div>
+        <strong>Product Data:</strong><br>
+        <span style="color: #888;">Zoho Inventory (source of truth) → Next.js ISR cached pages (~15 min revalidation) → public sees SRP, B2B sees bespoke pricing</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Sources -->
+  <div style="padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+    <h3 style="margin: 0 0 8px 0;">Data Sources</h3>
+    <div style="font-size: 14px; display: grid; gap: 4px;">
+      <div><strong>Products, variants, stock, images</strong> → Zoho Inventory API</div>
+      <div><strong>Invoices, sales orders, payments</strong> → Zoho Books API</div>
+      <div><strong>Dealers, partner applications, contacts</strong> → Zoho CRM API</div>
+      <div><strong>B2B auth, sessions, bespoke pricing tier</strong> → Clerk</div>
+      <div><strong>Payment processing</strong> → Stripe (via Zoho Books payment links)</div>
+    </div>
+  </div>
+
+  <!-- What Gets Retired -->
+  <div style="padding: 16px; background: rgba(239,68,68,0.06); border-radius: 8px; border: 1px solid rgba(239,68,68,0.2);">
+    <h3 style="margin: 0 0 8px 0;">What Gets Retired</h3>
+    <div style="font-size: 14px; display: grid; gap: 4px;">
+      <div>WordPress / WooCommerce site</div>
+      <div>AWS Lightsail instance</div>
+      <div>WooCommerce stock management scripts (scripts/ folder)</div>
+      <div>HubSpot tracking (replace with Google Analytics 4)</div>
+      <div>All WordPress plugins (Elementor, Savoy theme, LiteSpeed, etc.)</div>
+    </div>
+  </div>
+
+  <!-- Design -->
+  <div style="padding: 16px; background: rgba(168,85,247,0.06); border-radius: 8px; border: 1px solid rgba(168,85,247,0.2);">
+    <h3 style="margin: 0 0 8px 0;">Design Direction</h3>
+    <div style="font-size: 14px; color: #888;">
+      TBD — User will provide reference sites for design direction. Will be decided before implementation begins.
+    </div>
+  </div>
+
+</div>

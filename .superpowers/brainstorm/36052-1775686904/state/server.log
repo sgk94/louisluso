@@ -1,0 +1,3 @@
+{"type":"server-started","port":64732,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:64732","screen_dir":"/Users/shawnkim/code/louisluso/.superpowers/brainstorm/36052-1775686904/content","state_dir":"/Users/shawnkim/code/louisluso/.superpowers/brainstorm/36052-1775686904/state"}
+{"type":"screen-added","file":"/Users/shawnkim/code/louisluso/.superpowers/brainstorm/36052-1775686904/content/design-summary.html"}
+{"type":"server-stopped","reason":"idle timeout"}
