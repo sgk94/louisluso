@@ -19,6 +19,7 @@
     "email:import-sheets": "tsx email/cli-import-sheets.ts"
   },
   "dependencies": {
+    "@clerk/nextjs": "^7.0.12",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.37.0",
     "dotenv": "^16.4.7",

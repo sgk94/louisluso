@@ -96,7 +96,7 @@ export async function attachFileToLead(
   const url = `${env.ZOHO_API_BASE_URL}/crm/v6/Leads/${leadId}/Attachments`;
 
   const formData = new FormData();
-  const blob = new Blob([file]);
+  const blob = new Blob([new Uint8Array(file)]);
   formData.append("file", blob, fileName);
 
   const response = await fetch(url, {
