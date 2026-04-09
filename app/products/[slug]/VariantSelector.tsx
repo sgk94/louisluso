@@ -38,6 +38,7 @@ export function VariantSelector({
         <h3 className="text-xs font-medium uppercase tracking-wide text-gray-500">
           Color — {selected?.colorName ?? ""}
         </h3>
+        {/* Color swatches — gray placeholder until color hex mapping is added */}
         <div className="mt-3 flex gap-2">
           {variants.map((variant, index) => (
             <button

@@ -1,13 +1,18 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getProductBySlug } from "@/lib/catalog/catalog";
+import { getProductBySlug, getAllProductSlugs } from "@/lib/catalog/catalog";
+import { formatPrice } from "@/lib/catalog/format";
 import { VariantSelector } from "./VariantSelector";
 
 export const revalidate = 900; // ISR: 15 minutes
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
+  return getAllProductSlugs();
 }
 
 export async function generateMetadata({
@@ -64,7 +69,7 @@ export default async function ProductDetailPage({
           </h1>
 
           {product.srp !== null ? (
-            <p className="mt-2 text-xl">${product.srp.toFixed(0)}</p>
+            <p className="mt-2 text-xl">{formatPrice(product.srp)}</p>
           ) : (
             <p className="mt-2 text-sm text-gray-400">Contact for pricing</p>
           )}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { CatalogProduct } from "@/lib/catalog/types";
+import { formatPrice } from "@/lib/catalog/format";
 
 interface ProductCardProps {
   product: CatalogProduct;
@@ -31,11 +32,12 @@ export function ProductCard({ product }: ProductCardProps): React.ReactElement {
         </h3>
         {product.srp !== null ? (
           <p className="mt-1 text-sm text-gray-600">
-            ${product.srp.toFixed(0)}
+            {formatPrice(product.srp)}
           </p>
         ) : (
           <p className="mt-1 text-xs text-gray-400">Contact for pricing</p>
         )}
+        {/* Color dots — gray placeholder until color hex mapping is added */}
         <div className="mt-2 flex gap-1">
           {product.variants.map((v) => (
             <span

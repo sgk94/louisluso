@@ -1,4 +1,5 @@
 // lib/catalog/catalog.ts
+import { cache } from "react";
 import { getItemGroups, getPriceBooks, getPriceBook } from "@/lib/zoho/inventory";
 import type { ZohoItemGroup } from "@/lib/zoho/inventory";
 import { matchCollection, getCollectionBySlug } from "@/lib/catalog/collections";
@@ -78,7 +79,7 @@ function toCollectionDetail(c: Collection): CollectionDetail {
   };
 }
 
-export async function getCollectionProducts(
+export const getCollectionProducts = cache(async function getCollectionProducts(
   slug: string,
 ): Promise<CollectionWithProducts | null> {
   const collection = getCollectionBySlug(slug);
@@ -103,9 +104,9 @@ export async function getCollectionProducts(
     collection: toCollectionDetail(collection),
     products,
   };
-}
+});
 
-export async function getProductBySlug(
+export const getProductBySlug = cache(async function getProductBySlug(
   slug: string,
 ): Promise<{ product: CatalogProduct; collection: CollectionDetail } | null> {
   const [groups, srpLookup] = await Promise.all([
@@ -125,4 +126,16 @@ export async function getProductBySlug(
   }
 
   return null;
+});
+
+export async function getAllProductSlugs(): Promise<Array<{ slug: string }>> {
+  const groups = await getItemGroups();
+  const slugs: Array<{ slug: string }> = [];
+  for (const group of groups) {
+    const collection = matchCollection(group);
+    if (collection) {
+      slugs.push({ slug: group.group_name.toLowerCase() });
+    }
+  }
+  return slugs;
 }

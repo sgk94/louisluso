@@ -58,6 +58,7 @@ describe("getCollectionsByCategory", () => {
       ...getCollectionsByCategory("accessories"),
     ];
     expect(all.find((c) => c.slug === "clrotte")).toBeUndefined();
+    expect(all.find((c) => c.slug === "veritas-series")).toBeUndefined();
   });
 
   it("returns collections sorted by sortOrder", () => {
@@ -151,5 +152,15 @@ describe("matchCollection", () => {
   it("returns null for unrecognized products", () => {
     const group = makeGroup({ group_name: "UNKNOWN-999", brand: "UNKNOWN" });
     expect(matchCollection(group)).toBeNull();
+  });
+
+  it("matches TANI brand", () => {
+    const group = makeGroup({ group_name: "T-7247", brand: "TANI" });
+    expect(matchCollection(group)?.slug).toBe("tani");
+  });
+
+  it("matches LOUISLUSO JN- prefix to Junior Series", () => {
+    const group = makeGroup({ group_name: "JN-001", brand: "LOUISLUSO" });
+    expect(matchCollection(group)?.slug).toBe("junior-series");
   });
 });

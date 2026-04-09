@@ -20,7 +20,8 @@ export const COLLECTIONS: Collection[] = [
   { slug: "london-collection", name: "London Collection", category: "eyeglasses", skuPrefix: "LC-", brand: "LOUISLUSO", material: "Titanium", fallbackSrp: 243, sortOrder: 3 },
   { slug: "urban-collection", name: "Urban Collection", category: "eyeglasses", skuPrefix: "LU-", brand: "LOUISLUSO", material: "Titanium", fallbackSrp: 362, sortOrder: 4 },
   { slug: "milan-series", name: "Milan Series", category: "eyeglasses", skuPrefix: "ML-", brand: "LOUISLUSO", material: "Titanium", fallbackSrp: 296, sortOrder: 5 },
-  { slug: "classic", name: "Classic", category: "eyeglasses", skuPrefix: "LL-", brand: "LOUISLUSO", material: "ULTEM", fallbackSrp: 195, sortOrder: 6 },
+  { slug: "junior-series", name: "Junior Series", category: "eyeglasses", skuPrefix: "JN-", brand: "LOUISLUSO", material: "ULTEM", fallbackSrp: 214, sortOrder: 6 },
+  { slug: "classic", name: "Classic", category: "eyeglasses", skuPrefix: "LL-", brand: "LOUISLUSO", material: "ULTEM", fallbackSrp: 195, sortOrder: 7 },
   { slug: "louisluso-titanium", name: "Louisluso Titanium", category: "eyeglasses", skuPrefix: "LL(T)-", brand: "LOUISLUSO", material: "Titanium", fallbackSrp: 267, sortOrder: 7 },
   { slug: "grand-collection", name: "Grand Collection", category: "eyeglasses", skuPrefix: "GC-", brand: "LOUISLUSO", material: "ULTEM", fallbackSrp: 218, sortOrder: 8 },
   { slug: "rimless-air-series", name: "Rimless Air Series", category: "eyeglasses", skuPrefix: "RA-", brand: "LOUISLUSO", material: "ULTEM", fallbackSrp: 203, sortOrder: 9 },
@@ -32,7 +33,7 @@ export const COLLECTIONS: Collection[] = [
   { slug: "tandy-titanium", name: "Tandy Titanium", category: "eyeglasses", skuPrefix: "TA(T)-", brand: "TANDY", material: "Titanium", fallbackSrp: 324, sortOrder: 15 },
   { slug: "tani", name: "TANI", category: "eyeglasses", skuPrefix: "T-", brand: "TANI", material: "ULTEM", fallbackSrp: null, sortOrder: 16 },
   { slug: "veritas-classic", name: "Veritas Classic", category: "eyeglasses", skuPrefix: "VT-", brand: "VERITAS", material: "ULTEM", fallbackSrp: 154, sortOrder: 17 },
-  { slug: "veritas-series", name: "Veritas Series", category: "eyeglasses", skuPrefix: "VT-", brand: "VERITAS", material: "ULTEM", fallbackSrp: 154, sortOrder: 18 },
+  { slug: "veritas-series", name: "Veritas Series", category: "eyeglasses", skuPrefix: "VT-", brand: "VERITAS", material: "ULTEM", fallbackSrp: 154, sortOrder: 18, isDiscontinued: true },
   { slug: "manomos-glasses", name: "Manomos Glasses (BTS Collection)", category: "eyeglasses", skuPrefix: "", brand: "MANOMOS", material: "Acetate", fallbackSrp: null, sortOrder: 19 },
   // --- Sunglasses ---
   { slug: "manomos-sunglasses", name: "Manomos Sunglasses (BTS Collection)", category: "sunglasses", skuPrefix: "", brand: "MANOMOS", material: "Acetate", fallbackSrp: null, sortOrder: 1 },
@@ -83,10 +84,12 @@ export function matchCollection(group: ZohoItemGroup): Collection | null {
 
   if (brand === "SNF") return getCollectionBySlug("snf") ?? null;
   if (brand === "EYE CLOUD") return getCollectionBySlug("eyes-cloud-kids") ?? null;
+  if (brand === "TANI") return getCollectionBySlug("tani") ?? null;
 
   if (brand === "LOUISLUSO") {
     // LL(T)- must be checked before LL- to avoid prefix collision
     const prefixMap: Array<[string, string]> = [
+      ["JN-", "junior-series"],
       ["SG-", "signature-series"],
       ["SP-", "signature-plus-series"],
       ["LC-", "london-collection"],

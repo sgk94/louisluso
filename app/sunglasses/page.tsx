@@ -29,10 +29,15 @@ export default function SunglassesPage(): React.ReactElement {
                 </span>
               </div>
             </div>
-            <div className="mt-3">
+            <div className="mt-3 flex items-center justify-between">
               <h2 className="text-sm font-medium uppercase tracking-wide group-hover:underline">
                 {collection.name}
               </h2>
+              {collection.isNew && (
+                <span className="bg-black px-2 py-0.5 text-xs font-medium uppercase text-white">
+                  New
+                </span>
+              )}
             </div>
             <p className="mt-1 text-xs text-gray-500">
               {collection.material}
