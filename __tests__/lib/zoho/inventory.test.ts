@@ -12,8 +12,8 @@ import {
   getItems,
   getItemGroup,
   getItemGroups,
-  getPriceLists,
-  getPriceList,
+  getPriceBooks,
+  getPriceBook,
 } from "@/lib/zoho/inventory";
 
 describe("Zoho Inventory API", () => {
@@ -149,39 +149,37 @@ describe("Zoho Inventory API", () => {
     });
   });
 
-  describe("getPriceLists", () => {
-    it("returns price lists array", async () => {
-      const priceLists = [
-        { pricelist_id: "p1", name: "Wholesale", type: "percentage" },
-        { pricelist_id: "p2", name: "Retail", type: "fixed" },
+  describe("getPriceBooks", () => {
+    it("returns price books array", async () => {
+      const priceBooks = [
+        { pricebook_id: "p1", name: "SRP26", pricebook_type: "per_item", status: "active" },
+        { pricebook_id: "p2", name: "20% DISCOUNT", pricebook_type: "per_item", status: "active" },
       ];
-      mockZohoFetch.mockResolvedValueOnce({ pricelists: priceLists });
+      mockZohoFetch.mockResolvedValueOnce({ pricebooks: priceBooks, page_context: { has_more_page: false } });
 
-      const result = await getPriceLists();
+      const result = await getPriceBooks();
 
-      expect(mockZohoFetch).toHaveBeenCalledWith("/inventory/v1/pricelists");
-      expect(result).toEqual(priceLists);
+      expect(mockZohoFetch).toHaveBeenCalledWith("/inventory/v1/pricebooks");
+      expect(result).toEqual(priceBooks);
       expect(result).toHaveLength(2);
     });
   });
 
-  describe("getPriceList", () => {
-    it("fetches a single price list by ID", async () => {
-      const priceList = {
-        pricelist_id: "p1",
-        name: "Wholesale",
-        type: "percentage",
-        percentage: 30,
-        item_prices: [{ item_id: "1", price: 70 }],
+  describe("getPriceBook", () => {
+    it("fetches a single price book by ID", async () => {
+      const priceBook = {
+        pricebook_id: "p1",
+        name: "SRP26",
+        pricebook_type: "per_item",
+        status: "active",
+        pricebook_items: [{ pricebook_item_id: "pi1", item_id: "1", name: "SG-1011/1", pricebook_rate: 227 }],
       };
-      mockZohoFetch.mockResolvedValueOnce({ pricelist: priceList });
+      mockZohoFetch.mockResolvedValueOnce({ pricebook: priceBook });
 
-      const result = await getPriceList("p1");
+      const result = await getPriceBook("p1");
 
-      expect(mockZohoFetch).toHaveBeenCalledWith(
-        "/inventory/v1/pricelists/p1",
-      );
-      expect(result).toEqual(priceList);
+      expect(mockZohoFetch).toHaveBeenCalledWith("/inventory/v1/pricebooks/p1");
+      expect(result).toEqual(priceBook);
     });
   });
 });

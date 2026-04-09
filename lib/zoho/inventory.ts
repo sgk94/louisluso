@@ -26,12 +26,18 @@ export interface ZohoItemGroup {
   category_name?: string;
 }
 
-export interface ZohoPriceList {
-  pricelist_id: string;
+export interface ZohoPriceBook {
+  pricebook_id: string;
   name: string;
-  type: string;
+  pricebook_type: string;
+  status: string;
   percentage?: number;
-  item_prices?: Array<{ item_id: string; price: number }>;
+  pricebook_items?: Array<{
+    pricebook_item_id: string;
+    item_id: string;
+    name: string;
+    pricebook_rate: number;
+  }>;
 }
 
 interface PageContext {
@@ -52,12 +58,13 @@ interface ItemGroupsResponse {
   page_context: PageContext;
 }
 
-interface PriceListsResponse {
-  pricelists: ZohoPriceList[];
+interface PriceBooksResponse {
+  pricebooks: ZohoPriceBook[];
+  page_context: PageContext;
 }
 
-interface PriceListResponse {
-  pricelist: ZohoPriceList;
+interface PriceBookResponse {
+  pricebook: ZohoPriceBook;
 }
 
 const MAX_PAGES = 50;
@@ -97,20 +104,21 @@ export async function getItemGroups(): Promise<ZohoItemGroup[]> {
   return allGroups;
 }
 
-export async function getPriceLists(): Promise<ZohoPriceList[]> {
-  const response =
-    await zohoFetch<PriceListsResponse>("/inventory/v1/pricelists");
-  return response.pricelists;
+export async function getPriceBooks(): Promise<ZohoPriceBook[]> {
+  const response = await zohoFetch<PriceBooksResponse>(
+    "/inventory/v1/pricebooks",
+  );
+  return response.pricebooks;
 }
 
-export async function getPriceList(
-  priceListId: string,
-): Promise<ZohoPriceList> {
-  const parsed = zohoIdSchema.safeParse(priceListId);
-  if (!parsed.success) throw new Error("Invalid price list ID");
+export async function getPriceBook(
+  priceBookId: string,
+): Promise<ZohoPriceBook> {
+  const parsed = zohoIdSchema.safeParse(priceBookId);
+  if (!parsed.success) throw new Error("Invalid price book ID");
 
-  const response = await zohoFetch<PriceListResponse>(
-    `/inventory/v1/pricelists/${parsed.data}`,
+  const response = await zohoFetch<PriceBookResponse>(
+    `/inventory/v1/pricebooks/${parsed.data}`,
   );
-  return response.pricelist;
+  return response.pricebook;
 }
