@@ -10,6 +10,8 @@ const VALID_ENV = {
   UPSTASH_REDIS_REST_URL: "https://redis.upstash.io",
   UPSTASH_REDIS_REST_TOKEN: "test-redis-token",
   CLOUDINARY_CLOUD_NAME: "test-cloud",
+  CLOUDINARY_API_KEY: "test-api-key",
+  CLOUDINARY_API_SECRET: "test-api-secret",
   GMAIL_CLIENT_ID: "gmail-client-id",
   GMAIL_CLIENT_SECRET: "gmail-client-secret",
   GMAIL_REFRESH_TOKEN: "gmail-refresh-token",

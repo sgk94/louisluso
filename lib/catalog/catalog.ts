@@ -5,7 +5,7 @@ import type { ZohoItemGroup } from "@/lib/zoho/inventory";
 import { matchCollection, getCollectionBySlug } from "@/lib/catalog/collections";
 import type { Collection } from "@/lib/catalog/collections";
 import { parseColor, parseDimensions } from "@/lib/catalog/sku-parser";
-import { getProductImageUrl } from "@/lib/catalog/images";
+import { getProductImageUrl, getVariantImageUrl } from "@/lib/catalog/images";
 import type {
   CatalogProduct,
   CatalogVariant,
@@ -50,12 +50,13 @@ function groupToProduct(
 
   const variants: CatalogVariant[] = (group.items ?? []).map((item) => {
     const parsed = parseColor(item.sku);
+    const colorName = parsed?.colorName ?? item.name;
     return {
       id: item.item_id,
       colorCode: parsed?.colorCode ?? "",
-      colorName: parsed?.colorName ?? item.name,
+      colorName,
       inStock: item.stock_on_hand > 0,
-      image: getProductImageUrl(item.sku),
+      image: getVariantImageUrl(group.group_name, colorName),
     };
   });
 
@@ -64,7 +65,7 @@ function groupToProduct(
     slug: group.group_name.toLowerCase(),
     name: group.group_name,
     srp,
-    image: getProductImageUrl(firstSku),
+    image: getProductImageUrl(group.group_name),
     variants,
     dimensions,
   };
