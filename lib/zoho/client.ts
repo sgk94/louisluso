@@ -1,10 +1,19 @@
 import { env } from "@/lib/env";
 import { getAccessToken } from "@/lib/zoho/auth";
 
+export type ZohoProduct = "inventory" | "books" | "crm";
+
+const ORG_HEADERS: Record<ZohoProduct, string> = {
+  inventory: "X-com-zoho-inventory-organizationid",
+  books: "X-com-zoho-books-organizationid",
+  crm: "X-com-zoho-crm-organizationid",
+};
+
 interface ZohoFetchOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE";
   body?: Record<string, unknown>;
   params?: Record<string, string>;
+  product?: ZohoProduct;
 }
 
 export async function zohoFetch<T = unknown>(
@@ -13,6 +22,7 @@ export async function zohoFetch<T = unknown>(
 ): Promise<T> {
   const token = await getAccessToken();
   const method = options?.method ?? "GET";
+  const product = options?.product ?? detectProduct(path);
 
   const url = new URL(`${env.ZOHO_API_BASE_URL}${path}`);
   if (options?.params) {
@@ -23,7 +33,7 @@ export async function zohoFetch<T = unknown>(
 
   const headers: Record<string, string> = {
     Authorization: `Zoho-oauthtoken ${token}`,
-    "X-com-zoho-inventory-organizationid": env.ZOHO_ORG_ID,
+    [ORG_HEADERS[product]]: env.ZOHO_ORG_ID,
   };
 
   let body: string | undefined;
@@ -36,8 +46,43 @@ export async function zohoFetch<T = unknown>(
 
   if (!response.ok) {
     const errorBody = await response.text();
-    throw new Error(`Zoho API error ${response.status}: ${errorBody}`);
+    console.error(`Zoho API error [${method} ${path}]: ${response.status} ${errorBody}`);
+    throw new ZohoApiError(
+      "Zoho API request failed",
+      errorBody,
+      response.status,
+    );
   }
 
-  return (await response.json()) as T;
+  const json = await response.json();
+
+  if (typeof json === "object" && json !== null && "code" in json && (json as Record<string, unknown>).code !== 0) {
+    const msg = (json as Record<string, unknown>).message ?? "Unknown Zoho error";
+    console.error(`Zoho API error [${method} ${path}]: code=${(json as Record<string, unknown>).code} ${msg}`);
+    throw new ZohoApiError(
+      "Zoho API request failed",
+      String(msg),
+      200,
+    );
+  }
+
+  return json as T;
+}
+
+function detectProduct(path: string): ZohoProduct {
+  if (path.startsWith("/inventory")) return "inventory";
+  if (path.startsWith("/books")) return "books";
+  if (path.startsWith("/crm")) return "crm";
+  return "inventory";
+}
+
+export class ZohoApiError extends Error {
+  constructor(
+    message: string,
+    public readonly internalDetails: string,
+    public readonly statusCode: number,
+  ) {
+    super(message);
+    this.name = "ZohoApiError";
+  }
 }

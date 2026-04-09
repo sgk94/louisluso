@@ -1,6 +1,22 @@
+import { z } from "zod";
 import { zohoFetch } from "@/lib/zoho/client";
 import { getAccessToken } from "@/lib/zoho/auth";
 import { env } from "@/lib/env";
+import path from "path";
+
+const zohoIdSchema = z.string().regex(/^[a-zA-Z0-9_-]+$/, "Invalid Zoho ID");
+
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB
+const ALLOWED_EXTENSIONS = [".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx"];
+
+const ALLOWED_CONTACT_FILTER_KEYS = new Set([
+  "fields",
+  "per_page",
+  "page",
+  "sort_by",
+  "sort_order",
+  "type",
+]);
 
 export interface CRMLeadInput {
   Company: string;
@@ -65,8 +81,17 @@ export async function createLead(input: CRMLeadInput): Promise<string> {
 export async function getContacts(
   filters?: Record<string, string>,
 ): Promise<CRMContact[]> {
+  const sanitizedFilters: Record<string, string> = {};
+  if (filters) {
+    for (const [key, value] of Object.entries(filters)) {
+      if (ALLOWED_CONTACT_FILTER_KEYS.has(key)) {
+        sanitizedFilters[key] = value;
+      }
+    }
+  }
+
   const response = await zohoFetch<ContactsResponse>("/crm/v6/Contacts", {
-    params: filters,
+    params: Object.keys(sanitizedFilters).length > 0 ? sanitizedFilters : undefined,
   });
 
   return response.data ?? [];
@@ -75,8 +100,13 @@ export async function getContacts(
 export async function getContactById(
   contactId: string,
 ): Promise<CRMContact> {
+  const parsed = zohoIdSchema.safeParse(contactId);
+  if (!parsed.success) {
+    throw new Error("Invalid contact ID");
+  }
+
   const response = await zohoFetch<ContactByIdResponse>(
-    `/crm/v6/Contacts/${contactId}`,
+    `/crm/v6/Contacts/${parsed.data}`,
   );
 
   const contact = response.data?.[0];
@@ -89,28 +119,45 @@ export async function getContactById(
 
 export async function attachFileToLead(
   leadId: string,
-  file: Buffer,
+  file: Uint8Array,
   fileName: string,
 ): Promise<void> {
+  const parsedId = zohoIdSchema.safeParse(leadId);
+  if (!parsedId.success) {
+    throw new Error("Invalid lead ID");
+  }
+
+  if (file.length === 0) {
+    throw new Error("Empty file");
+  }
+  if (file.length > MAX_FILE_SIZE) {
+    throw new Error(`File exceeds maximum size of ${MAX_FILE_SIZE / 1024 / 1024}MB`);
+  }
+
+  const sanitizedName = path.basename(fileName);
+  const ext = path.extname(sanitizedName).toLowerCase();
+  if (!ALLOWED_EXTENSIONS.includes(ext)) {
+    throw new Error(`File type not allowed. Accepted: ${ALLOWED_EXTENSIONS.join(", ")}`);
+  }
+
   const token = await getAccessToken();
-  const url = `${env.ZOHO_API_BASE_URL}/crm/v6/Leads/${leadId}/Attachments`;
+  const url = `${env.ZOHO_API_BASE_URL}/crm/v6/Leads/${parsedId.data}/Attachments`;
 
   const formData = new FormData();
-  const blob = new Blob([new Uint8Array(file)]);
-  formData.append("file", blob, fileName);
+  const blob = new Blob([file as unknown as BlobPart]);
+  formData.append("file", blob, sanitizedName);
 
   const response = await fetch(url, {
     method: "POST",
     headers: {
       Authorization: `Zoho-oauthtoken ${token}`,
+      "X-com-zoho-crm-organizationid": env.ZOHO_ORG_ID,
     },
     body: formData,
   });
 
   if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(
-      `CRM attachFileToLead failed ${response.status}: ${errorBody}`,
-    );
+    console.error(`CRM attachFileToLead failed: ${response.status}`);
+    throw new Error("Failed to attach file to lead");
   }
 }

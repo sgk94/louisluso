@@ -92,7 +92,7 @@ describe("Zoho auth", () => {
     } as Response);
 
     await expect(getAccessToken()).rejects.toThrow(
-      "Zoho token refresh failed: 401 Unauthorized",
+      "Zoho token refresh failed",
     );
   });
 });

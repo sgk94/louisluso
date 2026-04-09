@@ -10,3 +10,4 @@ email/sent-log.jsonl
 email/credentials.json
 email/token.json
 .env.local
+.vercel

@@ -1,4 +1,7 @@
+import { z } from "zod";
 import { zohoFetch } from "@/lib/zoho/client";
+
+const zohoIdSchema = z.string().regex(/^[a-zA-Z0-9_-]+$/, "Invalid Zoho ID");
 
 export interface ZohoItem {
   item_id: string;
@@ -57,44 +60,41 @@ interface PriceListResponse {
   pricelist: ZohoPriceList;
 }
 
-export async function getItems(page: number = 1): Promise<ZohoItem[]> {
-  const response = await zohoFetch<ItemsResponse>("/inventory/v1/items", {
-    params: { page: String(page), per_page: "200" },
-  });
+const MAX_PAGES = 50;
 
-  const items = response.items;
-
-  if (response.page_context.has_more_page) {
-    const nextItems = await getItems(page + 1);
-    return [...items, ...nextItems];
+export async function getItems(): Promise<ZohoItem[]> {
+  const allItems: ZohoItem[] = [];
+  for (let page = 1; page <= MAX_PAGES; page++) {
+    const response = await zohoFetch<ItemsResponse>("/inventory/v1/items", {
+      params: { page: String(page), per_page: "200" },
+    });
+    allItems.push(...response.items);
+    if (!response.page_context.has_more_page) break;
   }
-
-  return items;
+  return allItems;
 }
 
 export async function getItemGroup(groupId: string): Promise<ZohoItemGroup> {
+  const parsed = zohoIdSchema.safeParse(groupId);
+  if (!parsed.success) throw new Error("Invalid group ID");
+
   const response = await zohoFetch<ItemGroupResponse>(
-    `/inventory/v1/itemgroups/${groupId}`,
+    `/inventory/v1/itemgroups/${parsed.data}`,
   );
   return response.item_group;
 }
 
-export async function getItemGroups(
-  page: number = 1,
-): Promise<ZohoItemGroup[]> {
-  const response = await zohoFetch<ItemGroupsResponse>(
-    "/inventory/v1/itemgroups",
-    { params: { page: String(page), per_page: "200" } },
-  );
-
-  const groups = response.itemgroups;
-
-  if (response.page_context.has_more_page) {
-    const nextGroups = await getItemGroups(page + 1);
-    return [...groups, ...nextGroups];
+export async function getItemGroups(): Promise<ZohoItemGroup[]> {
+  const allGroups: ZohoItemGroup[] = [];
+  for (let page = 1; page <= MAX_PAGES; page++) {
+    const response = await zohoFetch<ItemGroupsResponse>(
+      "/inventory/v1/itemgroups",
+      { params: { page: String(page), per_page: "200" } },
+    );
+    allGroups.push(...response.itemgroups);
+    if (!response.page_context.has_more_page) break;
   }
-
-  return groups;
+  return allGroups;
 }
 
 export async function getPriceLists(): Promise<ZohoPriceList[]> {
@@ -103,11 +103,14 @@ export async function getPriceLists(): Promise<ZohoPriceList[]> {
   return response.pricelists;
 }
 
-export async function getPriceListForContact(
+export async function getPriceList(
   priceListId: string,
 ): Promise<ZohoPriceList> {
+  const parsed = zohoIdSchema.safeParse(priceListId);
+  if (!parsed.success) throw new Error("Invalid price list ID");
+
   const response = await zohoFetch<PriceListResponse>(
-    `/inventory/v1/pricelists/${priceListId}`,
+    `/inventory/v1/pricelists/${parsed.data}`,
   );
   return response.pricelist;
 }

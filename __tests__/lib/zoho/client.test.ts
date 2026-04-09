@@ -88,7 +88,7 @@ describe("zohoFetch", () => {
     expect(parsed.searchParams.get("per_page")).toBe("25");
   });
 
-  it("throws on non-OK response with status code in error message", async () => {
+  it("throws ZohoApiError on non-OK response", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: false,
       status: 429,
@@ -96,7 +96,50 @@ describe("zohoFetch", () => {
     } as Response);
 
     await expect(zohoFetch("/inventory/v1/items")).rejects.toThrow(
-      "Zoho API error 429: Rate limit exceeded",
+      "Zoho API request failed",
+    );
+  });
+
+  it("uses correct org header for books paths", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ salesorders: [] }),
+    } as Response);
+
+    await zohoFetch("/books/v3/salesorders");
+
+    const [, options] = mockFetch.mock.calls[0] as [string, RequestInit];
+    expect(options.headers).toEqual(
+      expect.objectContaining({
+        "X-com-zoho-books-organizationid": "test-org-123",
+      }),
+    );
+  });
+
+  it("uses correct org header for crm paths", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ data: [] }),
+    } as Response);
+
+    await zohoFetch("/crm/v6/Contacts");
+
+    const [, options] = mockFetch.mock.calls[0] as [string, RequestInit];
+    expect(options.headers).toEqual(
+      expect.objectContaining({
+        "X-com-zoho-crm-organizationid": "test-org-123",
+      }),
+    );
+  });
+
+  it("throws on Zoho 200 response with error code", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ code: 57, message: "Not authorized" }),
+    } as Response);
+
+    await expect(zohoFetch("/inventory/v1/items")).rejects.toThrow(
+      "Zoho API request failed",
     );
   });
 });

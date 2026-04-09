@@ -1,4 +1,7 @@
+import { z } from "zod";
 import { zohoFetch } from "@/lib/zoho/client";
+
+const zohoIdSchema = z.string().regex(/^[a-zA-Z0-9_-]+$/, "Invalid Zoho ID");
 
 export interface LineItem {
   item_id: string;
@@ -91,8 +94,11 @@ export async function getSalesOrders(
 export async function getSalesOrder(
   salesOrderId: string,
 ): Promise<ZohoSalesOrder> {
+  const parsed = zohoIdSchema.safeParse(salesOrderId);
+  if (!parsed.success) throw new Error("Invalid sales order ID");
+
   const response = await zohoFetch<SalesOrderResponse>(
-    `/books/v3/salesorders/${salesOrderId}`,
+    `/books/v3/salesorders/${parsed.data}`,
   );
   return response.salesorder;
 }

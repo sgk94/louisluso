@@ -9,12 +9,9 @@ interface TokenCache {
 }
 
 let cache: TokenCache | null = null;
+let refreshPromise: Promise<string> | null = null;
 
-export async function getAccessToken(): Promise<string> {
-  if (cache && Date.now() < cache.expiresAt) {
-    return cache.accessToken;
-  }
-
+async function refreshToken(): Promise<string> {
   const params = new URLSearchParams({
     refresh_token: env.ZOHO_REFRESH_TOKEN,
     client_id: env.ZOHO_CLIENT_ID,
@@ -29,9 +26,8 @@ export async function getAccessToken(): Promise<string> {
   });
 
   if (!response.ok) {
-    throw new Error(
-      `Zoho token refresh failed: ${response.status} ${response.statusText}`,
-    );
+    console.error(`Zoho token refresh failed: ${response.status} ${response.statusText}`);
+    throw new Error("Zoho token refresh failed");
   }
 
   const data: { access_token: string; expires_in: number; token_type: string } =
@@ -45,6 +41,21 @@ export async function getAccessToken(): Promise<string> {
   return cache.accessToken;
 }
 
+export async function getAccessToken(): Promise<string> {
+  if (cache && Date.now() < cache.expiresAt) {
+    return cache.accessToken;
+  }
+
+  if (!refreshPromise) {
+    refreshPromise = refreshToken().finally(() => {
+      refreshPromise = null;
+    });
+  }
+
+  return refreshPromise;
+}
+
 export function clearTokenCache(): void {
   cache = null;
+  refreshPromise = null;
 }

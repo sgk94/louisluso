@@ -13,7 +13,7 @@ import {
   getItemGroup,
   getItemGroups,
   getPriceLists,
-  getPriceListForContact,
+  getPriceList,
 } from "@/lib/zoho/inventory";
 
 describe("Zoho Inventory API", () => {
@@ -30,7 +30,7 @@ describe("Zoho Inventory API", () => {
         page_context: { has_more_page: false },
       });
 
-      const result = await getItems(1);
+      const result = await getItems();
 
       expect(mockZohoFetch).toHaveBeenCalledWith("/inventory/v1/items", {
         params: { page: "1", per_page: "200" },
@@ -40,17 +40,15 @@ describe("Zoho Inventory API", () => {
       ]);
     });
 
-    it("defaults to page 1 when no page provided", async () => {
+    it("returns empty array when no items exist", async () => {
       mockZohoFetch.mockResolvedValueOnce({
         items: [],
         page_context: { has_more_page: false },
       });
 
-      await getItems();
+      const result = await getItems();
 
-      expect(mockZohoFetch).toHaveBeenCalledWith("/inventory/v1/items", {
-        params: { page: "1", per_page: "200" },
-      });
+      expect(result).toEqual([]);
     });
 
     it("recursively fetches all pages when has_more_page is true", async () => {
@@ -123,7 +121,7 @@ describe("Zoho Inventory API", () => {
         page_context: { has_more_page: false },
       });
 
-      const result = await getItemGroups(1);
+      const result = await getItemGroups();
 
       expect(mockZohoFetch).toHaveBeenCalledWith(
         "/inventory/v1/itemgroups",
@@ -167,7 +165,7 @@ describe("Zoho Inventory API", () => {
     });
   });
 
-  describe("getPriceListForContact", () => {
+  describe("getPriceList", () => {
     it("fetches a single price list by ID", async () => {
       const priceList = {
         pricelist_id: "p1",
@@ -178,7 +176,7 @@ describe("Zoho Inventory API", () => {
       };
       mockZohoFetch.mockResolvedValueOnce({ pricelist: priceList });
 
-      const result = await getPriceListForContact("p1");
+      const result = await getPriceList("p1");
 
       expect(mockZohoFetch).toHaveBeenCalledWith(
         "/inventory/v1/pricelists/p1",

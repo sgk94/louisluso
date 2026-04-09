@@ -43,6 +43,8 @@ const envSchema = z.object({
 
 export type Env = z.infer<typeof envSchema>;
 
+let _env: Env | null = null;
+
 function parseEnv(): Env {
   const result = envSchema.safeParse(process.env);
 
@@ -57,4 +59,9 @@ function parseEnv(): Env {
   return result.data;
 }
 
-export const env: Env = parseEnv();
+export const env: Env = new Proxy({} as Env, {
+  get(_target, prop: string) {
+    if (!_env) _env = parseEnv();
+    return _env[prop as keyof Env];
+  },
+});

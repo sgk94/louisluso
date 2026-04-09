@@ -1,6 +1,8 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 
+// Authentication is handled by Clerk middleware in proxy.ts.
+// This layout only checks authorization (partner role).
 export default async function PortalLayout({
   children,
 }: {
@@ -8,11 +10,7 @@ export default async function PortalLayout({
 }): Promise<React.ReactElement> {
   const user = await currentUser();
 
-  if (!user) {
-    redirect('/sign-in');
-  }
-
-  const role = (user.publicMetadata as { role?: string })?.role;
+  const role = (user?.publicMetadata as { role?: string } | undefined)?.role;
   if (role !== 'partner') {
     redirect('/');
   }

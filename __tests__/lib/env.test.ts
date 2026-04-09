@@ -76,44 +76,44 @@ describe("env", () => {
     expect(env.NODE_ENV).toBe("production");
   });
 
-  it("throws when required env vars are missing", async () => {
-    // Stub nothing — all required vars are missing
-    await expect(import("@/lib/env")).rejects.toThrow(
-      "Invalid environment variables"
-    );
+  it("throws on first property access when required env vars are missing", async () => {
+    const { env } = await import("@/lib/env");
+
+    expect(() => env.ZOHO_CLIENT_ID).toThrow("Invalid environment variables");
   });
 
-  it("throws when a single required var is missing", async () => {
+  it("throws on first access when a single required var is missing", async () => {
     for (const [key, value] of Object.entries(VALID_ENV)) {
       vi.stubEnv(key, value);
     }
-    // Remove one required var
     vi.stubEnv("ZOHO_CLIENT_ID", "");
 
-    await expect(import("@/lib/env")).rejects.toThrow(
-      "ZOHO_CLIENT_ID is required"
-    );
+    const { env } = await import("@/lib/env");
+
+    expect(() => env.ZOHO_CLIENT_ID).toThrow("ZOHO_CLIENT_ID is required");
   });
 
-  it("throws when UPSTASH_REDIS_REST_URL is not a valid URL", async () => {
+  it("throws on first access when UPSTASH_REDIS_REST_URL is not a valid URL", async () => {
     for (const [key, value] of Object.entries(VALID_ENV)) {
       vi.stubEnv(key, value);
     }
     vi.stubEnv("UPSTASH_REDIS_REST_URL", "not-a-url");
 
-    await expect(import("@/lib/env")).rejects.toThrow(
-      "UPSTASH_REDIS_REST_URL must be a valid URL"
+    const { env } = await import("@/lib/env");
+
+    expect(() => env.UPSTASH_REDIS_REST_URL).toThrow(
+      "UPSTASH_REDIS_REST_URL must be a valid URL",
     );
   });
 
-  it("throws when NODE_ENV is an invalid value", async () => {
+  it("throws on first access when NODE_ENV is an invalid value", async () => {
     for (const [key, value] of Object.entries(VALID_ENV)) {
       vi.stubEnv(key, value);
     }
     vi.stubEnv("NODE_ENV", "staging");
 
-    await expect(import("@/lib/env")).rejects.toThrow(
-      "Invalid environment variables"
-    );
+    const { env } = await import("@/lib/env");
+
+    expect(() => env.NODE_ENV).toThrow("Invalid environment variables");
   });
 });
