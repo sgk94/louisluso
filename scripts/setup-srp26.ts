@@ -171,8 +171,9 @@ async function main(): Promise<void> {
       const result = await zohoPost("/inventory/v1/pricebooks", {
         name: "SRP26",
         pricebook_type: "per_item",
-        currency_id: "",
         sales_or_purchase_type: "sales",
+        rounding_type: "no_rounding",
+        currency_id: "3278693000000000097",
         pricebook_items: srpItems,
       });
       console.log("SRP26 created:", JSON.stringify(result, null, 2));
