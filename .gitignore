@@ -11,3 +11,6 @@ email/credentials.json
 email/token.json
 .env.local
 .vercel
+
+# Script backup data
+scripts/data/
