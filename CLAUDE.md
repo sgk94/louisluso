@@ -1,9 +1,49 @@
 # louisluso.com — Website Summary
 
 ## About
-E-commerce eyewear retailer. Domain registered through Bluehost, hosted on AWS.
+E-commerce eyewear retailer (B2B wholesale to optical stores + B2C catalog). Domain registered through Bluehost, hosted on AWS (being migrated to Vercel).
 
-## Platform & Technology
+## New Website (in progress — Phase 1 complete)
+Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpowers/specs/2026-04-08-louisluso-website-redesign.md` for full spec.
+
+### Stack
+- **Framework:** Next.js 16 (App Router, TypeScript strict)
+- **Hosting:** Vercel Pro — https://louisluso-flax.vercel.app
+- **Auth:** Clerk (email-only login, B2B partner role)
+- **Backend:** Zoho One (Inventory, Books, CRM) via REST APIs
+- **Payments:** Stripe (via Zoho Books invoice payment links)
+- **Images:** Cloudinary (CDN + auto-optimization)
+- **Maps:** Mapbox (dealer locator)
+- **Rate Limiting:** Upstash Redis
+- **Icons:** Heroicons
+- **Newsletter:** Zoho Campaigns
+- **Email:** Gmail API (cs@louisluso.com)
+- **Testing:** Vitest, React Testing Library (48 tests)
+- **Package Manager:** pnpm
+
+### Project Structure (new site files)
+- `app/` — Next.js App Router pages and API routes
+- `lib/env.ts` — Zod-validated environment variables (lazy Proxy)
+- `lib/zoho/auth.ts` — Zoho OAuth2 token management with deduplication
+- `lib/zoho/client.ts` — Base HTTP client (auto-detects product, sets correct org header)
+- `lib/zoho/inventory.ts` — Zoho Inventory API (items, groups, price lists)
+- `lib/zoho/books.ts` — Zoho Books API (sales orders, invoices)
+- `lib/zoho/crm.ts` — Zoho CRM API (leads, contacts, file attachments)
+- `lib/rate-limit.ts` — Upstash rate limiter
+- `proxy.ts` — Clerk middleware (protects /portal routes)
+- `__tests__/` — Vitest test files
+- `.env.local` — Local environment variables (gitignored)
+- `.env.local.example` — Template for env vars
+
+### Phases
+1. **Foundation** — COMPLETE (scaffold, Zoho APIs, Clerk auth, rate limiting, Vercel deploy)
+2. **Public Catalog** — next (products from Zoho Inventory + Cloudinary)
+3. **Static Pages** — homepage, about, contact, become a partner, nav/footer
+4. **Dealer Locator** — Mapbox, CRM dealers, "Contact This Dealer" email
+5. **B2B Portal** — bespoke pricing, cart, quote/order, order history, favorites
+6. **Polish & Launch** — GA4, image migration, DNS cutover, WordPress retirement
+
+## Current Platform (WordPress — being replaced)
 - CMS: WordPress
 - E-commerce: WooCommerce
 - Page Builder: Elementor

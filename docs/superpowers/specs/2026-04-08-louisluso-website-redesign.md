@@ -539,17 +539,19 @@ Most security is delegated to trusted services, but our application layer must b
 
 | Task | Owner | Status |
 |---|---|---|
-| Create Zoho API Console app (Server-based Application) — scopes: Inventory, Books, CRM | Shawn | Pending |
-| Create Vercel account + project | Shawn | Pending |
-| Create Clerk account + application | Shawn | Pending |
+| Create Zoho API Console app (Server-based Application) — scopes: Inventory, Books, CRM | Shawn | Done (2026-04-08) |
+| Create Vercel account + project | Shawn | Done (qv-ision/louisluso) |
+| Create Clerk account + application | Shawn | Done (test keys, email-only) |
 | Create Stripe account | Shawn/Ken | Pending |
-| Create Cloudinary account | Shawn | Pending |
+| Create Cloudinary account | Shawn | Done (cloud: dctwzk6sn) |
+| Create Upstash Redis database | Shawn | Done (free tier) |
+| Create Mapbox account | Shawn | Pending |
 | Set up GA4 property | Shawn/Ken | Pending |
-| Confirm AWS Route 53 access (for DNS cutover to Vercel) | Ken | Pending |
+| Confirm AWS Route 53 access (for DNS cutover to Vercel) | Shawn/Ken | Pending |
 | Confirm Bluehost domain auto-renewal is active | Ken | Pending |
 | Connect Stripe to Zoho Books | Ken | Pending (after Zoho One migration) |
-| Zoho One migration (via sales rep) | Ken | Pending |
-| Provide design reference sites | Shawn | Pending |
+| Zoho One migration (via sales rep) | Ken | Pending (Enterprise Trial active) |
+| Provide design reference sites | Shawn | Done (Persol, Edward Beiner, SEE, Gentle Monster, Oliver Peoples) |
 
 ---
 
