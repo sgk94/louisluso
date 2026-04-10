@@ -24,7 +24,7 @@ export function DealerMap({ dealers, selectedDealerId, userLocation, onSelectDea
 
   // Initialize map
   useEffect(() => {
-    if (!mapContainer.current || mapRef.current) return;
+    if (!mapContainer.current || mapRef.current || !mapboxToken) return;
 
     mapboxgl.accessToken = mapboxToken;
 
@@ -99,6 +99,14 @@ export function DealerMap({ dealers, selectedDealerId, userLocation, onSelectDea
       duration: 800,
     });
   }, [selectedDealerId, dealers]);
+
+  if (!mapboxToken) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-[#0d1b2a]">
+        <p className="text-sm text-gray-500">Map unavailable</p>
+      </div>
+    );
+  }
 
   return (
     <div ref={mapContainer} className="h-full w-full" />

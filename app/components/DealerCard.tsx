@@ -23,7 +23,9 @@ export function DealerCard({ dealer, distance, selected, onSelect, onContact }: 
           : "border-l-[3px] border-l-transparent hover:bg-white/[0.02]"
       }`}
       onClick={() => onSelect(dealer)}
+      role="button"
       tabIndex={0}
+      aria-label={`Select ${dealer.name}`}
       onKeyDown={(e) => { if (e.key === "Enter") onSelect(dealer); }}
     >
       <div className="mb-1.5 flex items-start justify-between">
@@ -42,7 +44,7 @@ export function DealerCard({ dealer, distance, selected, onSelect, onContact }: 
       <div className="flex gap-1.5">
         <a
           href={`tel:${dealer.phone}`}
-          aria-label="Call"
+          aria-label={`Call ${dealer.name}`}
           className="flex-1 rounded border border-white/10 bg-white/[0.03] py-1.5 text-center text-[10px] text-gray-400 transition-colors hover:border-white/20 hover:text-gray-300"
           onClick={(e) => e.stopPropagation()}
         >
@@ -52,14 +54,14 @@ export function DealerCard({ dealer, distance, selected, onSelect, onContact }: 
           href={directionsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="Directions"
+          aria-label={`Directions to ${dealer.name}`}
           className="flex-1 rounded border border-white/10 bg-white/[0.03] py-1.5 text-center text-[10px] text-gray-400 transition-colors hover:border-white/20 hover:text-gray-300"
           onClick={(e) => e.stopPropagation()}
         >
           Directions
         </a>
         <button
-          aria-label="Contact"
+          aria-label={`Contact ${dealer.name}`}
           className="flex-[1.4] rounded bg-bronze py-1.5 text-center text-[10px] font-semibold text-white transition-colors hover:bg-bronze-light"
           onClick={(e) => {
             e.stopPropagation();

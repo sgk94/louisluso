@@ -4,7 +4,7 @@ const { mockSendEmail } = vi.hoisted(() => ({ mockSendEmail: vi.fn() }));
 const { mockRateLimit } = vi.hoisted(() => ({ mockRateLimit: vi.fn() }));
 
 vi.mock("@/lib/gmail", () => ({ sendEmail: mockSendEmail }));
-vi.mock("@/lib/rate-limit", () => ({ rateLimit: mockRateLimit }));
+vi.mock("@/lib/rate-limit", () => ({ rateLimitDealerContact: mockRateLimit }));
 vi.mock("next/headers", () => ({
   headers: vi.fn().mockResolvedValue(new Map([["x-forwarded-for", "127.0.0.1"]])),
 }));

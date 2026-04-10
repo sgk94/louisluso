@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { contactDealerSchema } from "@/lib/schemas/contact-dealer";
 import { sendEmail } from "@/lib/gmail";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimitDealerContact } from "@/lib/rate-limit";
 import { MOCK_DEALERS } from "@/lib/dealers/mock-data";
 
 interface RouteContext {
@@ -12,7 +12,7 @@ interface RouteContext {
 export async function POST(request: Request, context: RouteContext): Promise<NextResponse> {
   const headerList = await headers();
   const ip = headerList.get("x-forwarded-for")?.split(",")[0] ?? "anonymous";
-  const { success: rateLimitOk } = await rateLimit(ip);
+  const { success: rateLimitOk } = await rateLimitDealerContact(ip);
   if (!rateLimitOk) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }

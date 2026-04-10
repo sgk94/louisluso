@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { DealerMap } from "@/app/components/DealerMap";
 import { DealerCard } from "@/app/components/DealerCard";
 import { ContactDealerModal } from "@/app/components/ContactDealerModal";
@@ -33,19 +34,30 @@ export function FindADealerClient({ mapboxToken }: FindADealerClientProps): Reac
   const [searchQuery, setSearchQuery] = useState("");
   const [radius, setRadius] = useState<number | null>(25);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const [geoError, setGeoError] = useState(false);
+  const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  const productSlug = typeof window !== "undefined"
-    ? new URLSearchParams(window.location.search).get("product")
-    : null;
+  const searchParams = useSearchParams();
+  const productSlug = searchParams.get("product");
 
   // Fetch dealers
   useEffect(() => {
     async function fetchDealers(): Promise<void> {
-      const res = await fetch("/api/dealers");
-      const data = await res.json();
-      setAllDealers(data.dealers);
-      setLoading(false);
+      try {
+        const res = await fetch("/api/dealers");
+        if (!res.ok) {
+          setFetchError(true);
+          setLoading(false);
+          return;
+        }
+        const data = await res.json();
+        setAllDealers(data.dealers);
+      } catch {
+        setFetchError(true);
+      } finally {
+        setLoading(false);
+      }
     }
     fetchDealers();
   }, []);
@@ -110,10 +122,27 @@ export function FindADealerClient({ mapboxToken }: FindADealerClientProps): Reac
     setRadius(next);
   }, [radius]);
 
+  const handleSelectDealer = useCallback((dealer: Dealer): void => {
+    setSelectedDealer(dealer);
+    const card = cardRefs.current.get(dealer.id);
+    if (card) {
+      card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, []);
+
   if (loading) {
     return (
       <div className="flex h-[calc(100vh-4rem)] items-center justify-center bg-[#0a0a0a]">
         <p className="text-sm text-gray-500">Loading dealers...</p>
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div className="flex h-[calc(100vh-4rem)] flex-col items-center justify-center bg-[#0a0a0a]">
+        <p className="text-sm text-gray-400">Unable to load dealers.</p>
+        <a href="/contact" className="mt-2 text-xs text-bronze hover:underline">Contact us directly</a>
       </div>
     );
   }
@@ -150,7 +179,7 @@ export function FindADealerClient({ mapboxToken }: FindADealerClientProps): Reac
           dealers={filtered.map((f) => f.dealer)}
           selectedDealerId={selectedDealer?.id ?? null}
           userLocation={userLocation}
-          onSelectDealer={setSelectedDealer}
+          onSelectDealer={handleSelectDealer}
           mapboxToken={mapboxToken}
         />
       </div>
@@ -208,14 +237,15 @@ export function FindADealerClient({ mapboxToken }: FindADealerClientProps): Reac
             </div>
           ) : (
             filtered.map((entry) => (
-              <DealerCard
-                key={entry.dealer.id}
-                dealer={entry.dealer}
-                distance={entry.distance}
-                selected={selectedDealer?.id === entry.dealer.id}
-                onSelect={setSelectedDealer}
-                onContact={setContactDealer}
-              />
+              <div key={entry.dealer.id} ref={(el) => { if (el) cardRefs.current.set(entry.dealer.id, el); }}>
+                <DealerCard
+                  dealer={entry.dealer}
+                  distance={entry.distance}
+                  selected={selectedDealer?.id === entry.dealer.id}
+                  onSelect={handleSelectDealer}
+                  onContact={setContactDealer}
+                />
+              </div>
             ))
           )}
         </div>

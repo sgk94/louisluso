@@ -53,4 +53,22 @@ describe("contactDealerSchema", () => {
     });
     expect(result.success).toBe(true);
   });
+
+  it("rejects productSlug with path traversal characters", () => {
+    const result = contactDealerSchema.safeParse({
+      customerName: "John",
+      customerEmail: "john@example.com",
+      productSlug: "../../../admin",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts valid productSlug with hyphens and spaces", () => {
+    const result = contactDealerSchema.safeParse({
+      customerName: "John",
+      customerEmail: "john@example.com",
+      productSlug: "let it be",
+    });
+    expect(result.success).toBe(true);
+  });
 });
