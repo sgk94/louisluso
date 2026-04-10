@@ -119,7 +119,7 @@ Each card displays:
    - **From:** `cs@louisluso.com`
    - **To:** dealer's email
    - **Reply-To:** customer's email
-   - **BCC:** `admin@louisluso.com`, `cs@louisluso.com`
+   - **BCC:** `admin@louisluso.com`
    - **Subject:** "Customer Inquiry via LOUISLUSO — [Customer Name]"
    - **Body:** Customer name, email, message, product info (if applicable), link back to product page
 5. Show success state: "We've sent your info to [Dealer Name]. They'll reply directly to your email."
