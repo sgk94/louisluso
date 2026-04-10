@@ -39,6 +39,11 @@ const envSchema = z.object({
   GMAIL_CLIENT_SECRET: z.string().min(1, "GMAIL_CLIENT_SECRET is required"),
   GMAIL_REFRESH_TOKEN: z.string().min(1, "GMAIL_REFRESH_TOKEN is required"),
 
+  // Mapbox
+  NEXT_PUBLIC_MAPBOX_TOKEN: z
+    .string()
+    .min(1, "NEXT_PUBLIC_MAPBOX_TOKEN is required"),
+
   // Node
   NODE_ENV: z
     .enum(["development", "production", "test"])
