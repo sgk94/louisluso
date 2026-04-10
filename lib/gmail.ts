@@ -16,6 +16,7 @@ interface SendEmailOptions {
   subject: string;
   body: string;
   replyTo?: string;
+  bcc?: string[];
 }
 
 export async function sendEmail(options: SendEmailOptions): Promise<void> {
@@ -31,6 +32,10 @@ export async function sendEmail(options: SendEmailOptions): Promise<void> {
 
   if (options.replyTo) {
     headers.push(`Reply-To: ${options.replyTo}`);
+  }
+
+  if (options.bcc && options.bcc.length > 0) {
+    headers.push(`Bcc: ${options.bcc.join(", ")}`);
   }
 
   const message = [...headers, "", options.body].join("\r\n");
