@@ -3,7 +3,7 @@
 ## About
 E-commerce eyewear retailer (B2B wholesale to optical stores + B2C catalog). Domain registered through Bluehost, hosted on AWS (being migrated to Vercel).
 
-## New Website (in progress — Phase 2 complete)
+## New Website (in progress — Phase 3 complete)
 Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpowers/specs/2026-04-08-louisluso-website-redesign.md` for full spec.
 
 ### Stack
@@ -18,7 +18,8 @@ Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpower
 - **Icons:** Heroicons
 - **Newsletter:** Zoho Campaigns
 - **Email:** Gmail API (cs@louisluso.com)
-- **Testing:** Vitest, React Testing Library (89 tests)
+- **Fonts:** Cormorant Garamond (headings) + DM Sans (body) via next/font
+- **Testing:** Vitest, React Testing Library (121 tests)
 - **Package Manager:** pnpm
 
 ### Project Structure (new site files)
@@ -33,8 +34,13 @@ Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpower
 - `lib/catalog/catalog.ts` — Catalog data layer (Zoho items + SRP26 pricing merge, React.cache wrapped)
 - `lib/catalog/sku-parser.ts` — Parse color names and dimensions from Zoho SKU text
 - `lib/catalog/types.ts` — Shared catalog types (CatalogProduct, CatalogVariant, etc.)
-- `lib/catalog/images.ts` — Product image URL helper (placeholder, ready for Cloudinary)
+- `lib/catalog/images.ts` — Product image URL helper (Cloudinary URLs)
 - `lib/catalog/format.ts` — Price formatting (Intl.NumberFormat)
+- `lib/fonts.ts` — Font configuration (Cormorant Garamond + DM Sans)
+- `lib/gmail.ts` — Gmail API send utility for contact/partner forms
+- `lib/schemas/contact.ts` — Contact form Zod validation schema
+- `lib/schemas/partner.ts` — Partner application Zod validation schema
+- `lib/constants.ts` — Shared business info (address, email, social links)
 - `lib/rate-limit.ts` — Upstash rate limiter
 - `proxy.ts` — Clerk middleware (protects /portal routes)
 - `__tests__/` — Vitest test files
@@ -43,9 +49,9 @@ Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpower
 
 ### Phases
 1. **Foundation** — COMPLETE (scaffold, Zoho APIs, Clerk auth, rate limiting, Vercel deploy)
-2. **Public Catalog** — COMPLETE (collection pages, product grids, product detail, SRP26 pricing, SKU parsing, 245 SSG pages)
-3. **Static Pages** — next (homepage, about, contact, become a partner, nav/footer)
-4. **Dealer Locator** — Mapbox, CRM dealers, "Contact This Dealer" email
+2. **Public Catalog** — COMPLETE (collection pages, product grids, product detail, SRP26 pricing, Cloudinary images, 276 SSG pages)
+3. **Static Pages** — COMPLETE (design system, nav/footer, homepage, about, why, contact form, partner application, privacy/terms)
+4. **Dealer Locator** — next (Mapbox, CRM dealers, "Contact This Dealer" email)
 5. **B2B Portal** — bespoke pricing, cart, quote/order, order history, favorites
 6. **Polish & Launch** — GA4, image migration, DNS cutover, WordPress retirement
 
