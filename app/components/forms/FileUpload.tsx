@@ -14,12 +14,19 @@ interface FileUploadProps {
 
 export function FileUpload({ label, name, accept = ".pdf", maxSizeMB = 20, required = false, onFileSelect, error }: FileUploadProps): React.ReactElement {
   const [fileName, setFileName] = useState<string | null>(null);
+  const [sizeError, setSizeError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   function handleFile(file: File | null): void {
+    setSizeError(null);
     if (!file) { setFileName(null); onFileSelect(null); return; }
-    if (file.size > maxSizeMB * 1024 * 1024) { setFileName(null); onFileSelect(null); return; }
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      setFileName(null);
+      onFileSelect(null);
+      setSizeError(`File is too large. Maximum size is ${maxSizeMB}MB.`);
+      return;
+    }
     setFileName(file.name);
     onFileSelect(file);
   }
@@ -55,7 +62,7 @@ export function FileUpload({ label, name, accept = ".pdf", maxSizeMB = 20, requi
           className="hidden"
         />
       </div>
-      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+      {(error || sizeError) && <p className="mt-1 text-xs text-red-500">{error || sizeError}</p>}
     </div>
   );
 }

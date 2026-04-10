@@ -31,12 +31,17 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   const data = parsed.data;
   const file = formData.get("creditApplication") as File | null;
+  let fileBuffer: Uint8Array | null = null;
   if (file && file.size > 0) {
-    if (file.type !== "application/pdf") {
-      return NextResponse.json({ error: "Only PDF files are accepted" }, { status: 400 });
-    }
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json({ error: "File must be under 20MB" }, { status: 400 });
+    }
+    fileBuffer = new Uint8Array(await file.arrayBuffer());
+    // Validate PDF magic bytes: %PDF- (hex 25 50 44 46 2D)
+    const PDF_MAGIC = [0x25, 0x50, 0x44, 0x46, 0x2D];
+    const isPdf = PDF_MAGIC.every((byte, i) => fileBuffer![i] === byte);
+    if (!isPdf) {
+      return NextResponse.json({ error: "Only PDF files are accepted" }, { status: 400 });
     }
   }
 
@@ -65,9 +70,8 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     const leadId = await createLead(leadInput);
 
-    if (file && file.size > 0) {
-      const buffer = new Uint8Array(await file.arrayBuffer());
-      await attachFileToLead(leadId, buffer, file.name);
+    if (fileBuffer) {
+      await attachFileToLead(leadId, fileBuffer, file!.name);
     }
 
     return NextResponse.json({ success: true });

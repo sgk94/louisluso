@@ -16,6 +16,7 @@ const SUBJECT_OPTIONS = [
 export default function ContactPage(): React.ReactElement {
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [generalError, setGeneralError] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -28,27 +29,35 @@ export default function ContactPage(): React.ReactElement {
     e.preventDefault();
     setLoading(true);
     setErrors({});
+    setGeneralError("");
 
-    const response = await fetch("/api/contact", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-    const data = await response.json();
-    setLoading(false);
+      const data = await response.json();
 
-    if (!response.ok) {
-      if (data.details) {
-        const fieldErrors: Record<string, string> = {};
-        for (const [key, msgs] of Object.entries(data.details)) {
-          fieldErrors[key] = (msgs as string[])[0] ?? "";
+      if (!response.ok) {
+        if (data.details) {
+          const fieldErrors: Record<string, string> = {};
+          for (const [key, msgs] of Object.entries(data.details)) {
+            fieldErrors[key] = (msgs as string[])[0] ?? "";
+          }
+          setErrors(fieldErrors);
+        } else {
+          setGeneralError(data.error ?? "Something went wrong. Please try again.");
         }
-        setErrors(fieldErrors);
+        return;
       }
-      return;
+      setSubmitted(true);
+    } catch {
+      setGeneralError("Unable to send message. Please check your connection and try again.");
+    } finally {
+      setLoading(false);
     }
-    setSubmitted(true);
   }
 
   if (submitted) {
@@ -70,6 +79,11 @@ export default function ContactPage(): React.ReactElement {
 
         <div className="mt-12 grid grid-cols-1 gap-16 lg:grid-cols-2">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {generalError && (
+              <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                {generalError}
+              </div>
+            )}
             <TextInput label="Name" name="name" required value={form.name} onChange={(v) => update("name", v)} error={errors.name} />
             <TextInput label="Email" name="email" type="email" required value={form.email} onChange={(v) => update("email", v)} error={errors.email} />
             <TextInput label="Phone" name="phone" type="tel" value={form.phone} onChange={(v) => update("phone", v)} />

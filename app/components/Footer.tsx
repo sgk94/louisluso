@@ -73,7 +73,7 @@ export function Footer(): React.ReactElement {
           <FooterLinkGroup title="Connect" links={connectLinks} />
         </div>
         <div className="mt-12 border-t border-gray-800 pt-8">
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-gray-600" suppressHydrationWarning>
             &copy; {new Date().getFullYear()} LOUISLUSO. All rights reserved.
           </p>
         </div>

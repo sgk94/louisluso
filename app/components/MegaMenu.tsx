@@ -20,8 +20,15 @@ export function MegaMenu({ collections, label, basePath }: MegaMenuProps): React
         setOpen(false);
       }
     }
+    function handleEscape(e: KeyboardEvent): void {
+      if (e.key === "Escape") setOpen(false);
+    }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
   }, []);
 
   return (
@@ -29,12 +36,15 @@ export function MegaMenu({ collections, label, basePath }: MegaMenuProps): React
       <button
         onClick={() => setOpen(!open)}
         onMouseEnter={() => setOpen(true)}
+        aria-expanded={open}
+        aria-haspopup="true"
         className="text-xs font-medium uppercase tracking-[1.5px] text-gray-700 transition-colors hover:text-bronze"
       >
         {label}
       </button>
       {open && (
         <div
+          role="menu"
           onMouseLeave={() => setOpen(false)}
           className="absolute left-0 top-full z-50 mt-2 w-[500px] border border-gray-200 bg-white p-6 shadow-lg"
         >

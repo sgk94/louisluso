@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import type { Collection } from "@/lib/catalog/collections";
@@ -18,9 +18,20 @@ export function MobileMenu({ eyeglassesCollections, sunglassesCollections }: Mob
     setExpandedSection(expandedSection === section ? null : section);
   }
 
+  const handleEscape = useCallback((e: KeyboardEvent) => {
+    if (e.key === "Escape") setOpen(false);
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      document.addEventListener("keydown", handleEscape);
+      return () => document.removeEventListener("keydown", handleEscape);
+    }
+  }, [open, handleEscape]);
+
   return (
     <>
-      <button onClick={() => setOpen(true)} className="lg:hidden" aria-label="Open menu">
+      <button onClick={() => setOpen(true)} className="lg:hidden" aria-label="Open menu" aria-expanded={open}>
         <Bars3Icon className="h-6 w-6 text-gray-700" />
       </button>
 

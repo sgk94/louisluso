@@ -28,6 +28,7 @@ export default function BecomeAPartnerPage(): React.ReactElement {
   });
   const [file, setFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [generalError, setGeneralError] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -40,26 +41,34 @@ export default function BecomeAPartnerPage(): React.ReactElement {
     e.preventDefault();
     setLoading(true);
     setErrors({});
+    setGeneralError("");
 
-    const formData = new FormData();
-    for (const [key, value] of Object.entries(form)) formData.append(key, value);
-    if (file) formData.append("creditApplication", file);
+    try {
+      const formData = new FormData();
+      for (const [key, value] of Object.entries(form)) formData.append(key, value);
+      if (file) formData.append("creditApplication", file);
 
-    const response = await fetch("/api/become-a-partner", { method: "POST", body: formData });
-    const data = await response.json();
-    setLoading(false);
+      const response = await fetch("/api/become-a-partner", { method: "POST", body: formData });
+      const data = await response.json();
 
-    if (!response.ok) {
-      if (data.details) {
-        const fieldErrors: Record<string, string> = {};
-        for (const [key, msgs] of Object.entries(data.details)) {
-          fieldErrors[key] = (msgs as string[])[0] ?? "";
+      if (!response.ok) {
+        if (data.details) {
+          const fieldErrors: Record<string, string> = {};
+          for (const [key, msgs] of Object.entries(data.details)) {
+            fieldErrors[key] = (msgs as string[])[0] ?? "";
+          }
+          setErrors(fieldErrors);
+        } else {
+          setGeneralError(data.error ?? "Something went wrong. Please try again.");
         }
-        setErrors(fieldErrors);
+        return;
       }
-      return;
+      setSubmitted(true);
+    } catch {
+      setGeneralError("Unable to submit application. Please check your connection and try again.");
+    } finally {
+      setLoading(false);
     }
-    setSubmitted(true);
   }
 
   if (submitted) {
@@ -80,6 +89,11 @@ export default function BecomeAPartnerPage(): React.ReactElement {
         <p className="mt-2 text-gray-600">Join 500+ optical stores carrying the world&apos;s lightest frames. Competitive wholesale pricing, dedicated support, and a product your customers will love.</p>
 
         <form onSubmit={handleSubmit} className="mt-12 space-y-6">
+          {generalError && (
+            <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+              {generalError}
+            </div>
+          )}
           <TextInput label="Company Name" name="company" required value={form.company} onChange={(v) => update("company", v)} error={errors.company} />
           <TextInput label="Contact Name" name="contactName" required value={form.contactName} onChange={(v) => update("contactName", v)} error={errors.contactName} />
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
