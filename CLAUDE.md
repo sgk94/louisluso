@@ -3,7 +3,7 @@
 ## About
 E-commerce eyewear retailer (B2B wholesale to optical stores + B2C catalog). Domain registered through Bluehost, hosted on AWS (being migrated to Vercel).
 
-## New Website (in progress — Phase 3 complete)
+## New Website (in progress — Phase 4 complete)
 Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpowers/specs/2026-04-08-louisluso-website-redesign.md` for full spec.
 
 ### Stack
@@ -19,7 +19,7 @@ Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpower
 - **Newsletter:** Zoho Campaigns
 - **Email:** Gmail API (cs@louisluso.com)
 - **Fonts:** Cormorant Garamond (headings) + DM Sans (body) via next/font
-- **Testing:** Vitest, React Testing Library (121 tests)
+- **Testing:** Vitest, React Testing Library (162 tests)
 - **Package Manager:** pnpm
 
 ### Project Structure (new site files)
@@ -37,11 +37,15 @@ Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpower
 - `lib/catalog/images.ts` — Product image URL helper (Cloudinary URLs)
 - `lib/catalog/format.ts` — Price formatting (Intl.NumberFormat)
 - `lib/fonts.ts` — Font configuration (Cormorant Garamond + DM Sans)
-- `lib/gmail.ts` — Gmail API send utility for contact/partner forms
+- `lib/gmail.ts` — Gmail API send utility with BCC support
 - `lib/schemas/contact.ts` — Contact form Zod validation schema
 - `lib/schemas/partner.ts` — Partner application Zod validation schema
+- `lib/schemas/contact-dealer.ts` — Contact dealer form Zod schema
 - `lib/constants.ts` — Shared business info (address, email, social links)
-- `lib/rate-limit.ts` — Upstash rate limiter
+- `lib/rate-limit.ts` — Upstash rate limiter (general + dealer-contact specific)
+- `lib/dealers/types.ts` — Dealer type definitions
+- `lib/dealers/mock-data.ts` — 10 mock dealers (Chicago area, to be replaced with Zoho CRM)
+- `lib/dealers/distance.ts` — Haversine distance calculation + sort/filter by radius
 - `proxy.ts` — Clerk middleware (protects /portal routes)
 - `__tests__/` — Vitest test files
 - `.env.local` — Local environment variables (gitignored)
@@ -51,8 +55,8 @@ Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpower
 1. **Foundation** — COMPLETE (scaffold, Zoho APIs, Clerk auth, rate limiting, Vercel deploy)
 2. **Public Catalog** — COMPLETE (collection pages, product grids, product detail, SRP26 pricing, Cloudinary images, 276 SSG pages)
 3. **Static Pages** — COMPLETE (design system, nav/footer, homepage, about, why, contact form, partner application, privacy/terms)
-4. **Dealer Locator** — next (Mapbox, CRM dealers, "Contact This Dealer" email)
-5. **B2B Portal** — bespoke pricing, cart, quote/order, order history, favorites
+4. **Dealer Locator** — COMPLETE (frontend: dark Mapbox map, dealer sidebar, contact modal, mock data; backend Zoho CRM integration deferred)
+5. **B2B Portal** — next (bespoke pricing, cart, quote/order, order history, favorites)
 6. **Polish & Launch** — GA4, image migration, DNS cutover, WordPress retirement
 
 ## Current Platform (WordPress — being replaced)
