@@ -40,9 +40,23 @@ Frontend-first build: mock dealer data now, Zoho CRM integration later.
 ## Search
 
 - Text input geocodes via Mapbox Geocoding API (client-side, forward geocoding)
-- On search: re-center map to result, filter dealers by distance (25mi default)
+- On search: re-center map to result, filter dealers by distance
 - "Near me" button re-triggers geolocation
 - Debounced input (300ms) for autocomplete suggestions (Mapbox Search)
+
+### Radius Selector
+
+Dropdown next to search bar with options: **10mi, 25mi (default), 50mi, 100mi, 250mi, All Dealers**
+
+- Changing radius re-filters the dealer list and adjusts map zoom
+- "All Dealers" shows every dealer nationwide sorted by distance
+
+### Empty State
+
+When no dealers are found within the selected radius:
+- Message: "No dealers within [X] miles."
+- Auto-expand button: "Expand search to [next radius]" (e.g., 25mi → 50mi)
+- If no dealers at any radius: "No dealers found. Contact us directly at cs@louisluso.com" with link to `/contact`
 
 ---
 
