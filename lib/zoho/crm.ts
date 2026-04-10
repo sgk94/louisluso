@@ -117,6 +117,22 @@ export async function getContactById(
   return contact;
 }
 
+export async function getContactByEmail(
+  email: string,
+): Promise<CRMContact | null> {
+  if (!email.includes("@")) {
+    throw new Error("Invalid email");
+  }
+
+  const response = await zohoFetch<ContactsResponse>(
+    "/crm/v6/Contacts/search",
+    { params: { email } },
+  );
+
+  const contact = response.data?.[0];
+  return contact ?? null;
+}
+
 export async function attachFileToLead(
   leadId: string,
   file: Uint8Array,
