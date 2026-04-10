@@ -1,10 +1,15 @@
 import Link from "next/link";
 import { HeartIcon } from "@heroicons/react/24/outline";
+import { currentUser } from "@clerk/nextjs/server";
 import { getCollectionsByCategory } from "@/lib/catalog/collections";
+import { isPartner } from "@/lib/portal/types";
 import { MegaMenu } from "./MegaMenu";
 import { MobileMenu } from "./MobileMenu";
+import { UserMenu } from "./UserMenu";
 
-export function Navigation(): React.ReactElement {
+export async function Navigation(): Promise<React.ReactElement> {
+  const user = await currentUser();
+  const partner = user ? isPartner(user.publicMetadata) : false;
   const eyeglasses = getCollectionsByCategory("eyeglasses");
   const sunglasses = getCollectionsByCategory("sunglasses");
 
@@ -40,11 +45,15 @@ export function Navigation(): React.ReactElement {
           <div className="hidden items-center gap-6 lg:flex">
             <Link href="/find-a-dealer" className="text-xs font-medium uppercase tracking-[1.5px] text-gray-700 transition-colors hover:text-bronze">Find a Dealer</Link>
             <Link href="/portal" aria-label="Favorites"><HeartIcon className="h-5 w-5 text-gray-500 transition-colors hover:text-bronze" /></Link>
-            <Link href="/portal" className="text-xs font-medium uppercase tracking-[1.5px] text-gray-700 transition-colors hover:text-bronze">Login</Link>
+            {partner ? (
+              <UserMenu />
+            ) : (
+              <Link href="/portal" className="text-xs font-medium uppercase tracking-[1.5px] text-gray-700 transition-colors hover:text-bronze">Login</Link>
+            )}
           </div>
 
           {/* Mobile menu toggle */}
-          <MobileMenu eyeglassesCollections={eyeglasses} sunglassesCollections={sunglasses} />
+          <MobileMenu eyeglassesCollections={eyeglasses} sunglassesCollections={sunglasses} isPartner={partner} />
         </div>
       </nav>
     </header>

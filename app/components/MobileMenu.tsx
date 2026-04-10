@@ -8,9 +8,10 @@ import type { Collection } from "@/lib/catalog/collections";
 interface MobileMenuProps {
   eyeglassesCollections: Collection[];
   sunglassesCollections: Collection[];
+  isPartner?: boolean;
 }
 
-export function MobileMenu({ eyeglassesCollections, sunglassesCollections }: MobileMenuProps): React.ReactElement {
+export function MobileMenu({ eyeglassesCollections, sunglassesCollections, isPartner }: MobileMenuProps): React.ReactElement {
   const [open, setOpen] = useState(false);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
@@ -92,6 +93,18 @@ export function MobileMenu({ eyeglassesCollections, sunglassesCollections }: Mob
                   Contact Us
                 </Link>
               </div>
+
+              {isPartner && (
+                <div className="border-t border-gray-200 pt-4">
+                  <p className="mb-2 text-[10px] font-medium uppercase tracking-[2px] text-gray-400">Partner</p>
+                  <Link href="/portal" onClick={() => setOpen(false)} className="block text-sm text-gray-500 hover:text-bronze">
+                    Dashboard
+                  </Link>
+                  <Link href="/portal/account" onClick={() => setOpen(false)} className="mt-2 block text-sm text-gray-500 hover:text-bronze">
+                    Account
+                  </Link>
+                </div>
+              )}
             </nav>
           </div>
         </div>
