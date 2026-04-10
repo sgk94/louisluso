@@ -14,3 +14,10 @@ email/token.json
 
 # Script backup data
 scripts/data/
+
+# Build artifacts
+tsconfig.tsbuildinfo
+
+# Plugin state
+.claude-octopus/
+.superpowers/
