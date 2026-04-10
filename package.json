@@ -16,6 +16,7 @@
     "email:sequence": "tsx email/cli-sequence.ts",
     "email:blast": "tsx email/campaigns/new-collection-blast.ts",
     "email:auth": "tsx email/cli-auth.ts",
+    "portal:invite": "tsx scripts/portal-invite.ts",
     "email:import-sheets": "tsx email/cli-import-sheets.ts"
   },
   "dependencies": {
