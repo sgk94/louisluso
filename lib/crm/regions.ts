@@ -48,11 +48,15 @@ export interface KnowledgeBaseEntry {
   region: string | null;
 }
 
-const KB_PATH = join(process.cwd(), "data", "location-kb.json");
+export const KB_PATH = join(process.cwd(), "data", "location-kb.json");
 
 export function loadKnowledgeBase(): Record<string, KnowledgeBaseEntry> {
   if (!existsSync(KB_PATH)) return {};
-  return JSON.parse(readFileSync(KB_PATH, "utf-8")) as Record<string, KnowledgeBaseEntry>;
+  try {
+    return JSON.parse(readFileSync(KB_PATH, "utf-8")) as Record<string, KnowledgeBaseEntry>;
+  } catch {
+    return {};
+  }
 }
 
 export function lookupCity(city: string, state: string): KnowledgeBaseEntry | null {

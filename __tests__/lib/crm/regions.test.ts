@@ -1,10 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterAll } from "vitest";
-import { matchRegion, REGIONS, type Region } from "@/lib/crm/regions";
-import { lookupCity, updateKnowledgeBase, loadKnowledgeBase } from "@/lib/crm/regions";
+import { matchRegion, REGIONS, type Region, getRegionName, lookupCity, updateKnowledgeBase, loadKnowledgeBase, KB_PATH } from "@/lib/crm/regions";
 import { writeFileSync } from "fs";
-import { join } from "path";
-
-const KB_PATH = join(process.cwd(), "data", "location-kb.json");
 
 describe("REGIONS", () => {
   it("exports a non-empty array of regions", () => {
@@ -113,5 +109,15 @@ describe("knowledge base", () => {
 
     const kb = loadKnowledgeBase();
     expect(Object.keys(kb)).toHaveLength(2);
+  });
+});
+
+describe("getRegionName", () => {
+  it("returns name for valid slug", () => {
+    expect(getRegionName("socal")).toBe("Southern California");
+  });
+
+  it("returns null for unknown slug", () => {
+    expect(getRegionName("nowhere")).toBeNull();
   });
 });

@@ -15,6 +15,9 @@ email/token.json
 # Script backup data
 scripts/data/
 
+# Location knowledge base (grows over time with real city data)
+data/location-kb.json
+
 # Build artifacts
 tsconfig.tsbuildinfo
 
