@@ -3,10 +3,14 @@ import { ProductCard } from "./ProductCard";
 
 interface ProductGridProps {
   products: CatalogProduct[];
+  isPartner?: boolean;
+  bespokePrices?: Record<string, number>;
 }
 
 export function ProductGrid({
   products,
+  isPartner = false,
+  bespokePrices,
 }: ProductGridProps): React.ReactElement {
   if (products.length === 0) {
     return (
@@ -18,9 +22,18 @@ export function ProductGrid({
 
   return (
     <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
-      ))}
+      {products.map((product) => {
+        const firstVariantId = product.variants[0]?.id;
+        const bespokePrice = firstVariantId && bespokePrices ? bespokePrices[firstVariantId] ?? null : null;
+        return (
+          <ProductCard
+            key={product.id}
+            product={product}
+            isPartner={isPartner}
+            bespokePrice={bespokePrice}
+          />
+        );
+      })}
     </div>
   );
 }

@@ -71,4 +71,17 @@ describe("ProductCard", () => {
     render(<ProductCard product={product} />);
     expect(screen.queryByText("Temporarily Out of Stock")).not.toBeInTheDocument();
   });
+
+  it("renders listing price when isPartner is true", () => {
+    render(<ProductCard product={makeProduct({ listingPrice: 76 })} isPartner={true} bespokePrice={null} />);
+    expect(screen.getByText("$76")).toBeInTheDocument();
+    expect(screen.queryByText("$227")).not.toBeInTheDocument();
+  });
+
+  it("renders strikethrough + pill for bespoke partner", () => {
+    const { container } = render(<ProductCard product={makeProduct({ listingPrice: 76 })} isPartner={true} bespokePrice={68} />);
+    const strikethrough = container.querySelector("s");
+    expect(strikethrough?.textContent).toBe("$76");
+    expect(screen.getByText("$68")).toBeInTheDocument();
+  });
 });

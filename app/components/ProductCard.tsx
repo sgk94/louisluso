@@ -1,13 +1,15 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { CatalogProduct } from "@/lib/catalog/types";
-import { formatPrice } from "@/lib/catalog/format";
+import { PartnerPrice } from "./PartnerPrice";
 
 interface ProductCardProps {
   product: CatalogProduct;
+  isPartner?: boolean;
+  bespokePrice?: number | null;
 }
 
-export function ProductCard({ product }: ProductCardProps): React.ReactElement {
+export function ProductCard({ product, isPartner = false, bespokePrice = null }: ProductCardProps): React.ReactElement {
   const allOutOfStock = product.variants.every((v) => !v.inStock);
 
   return (
@@ -30,14 +32,14 @@ export function ProductCard({ product }: ProductCardProps): React.ReactElement {
         <h3 className="text-sm font-medium uppercase tracking-wide">
           {product.name}
         </h3>
-        {product.srp !== null ? (
-          <p className="mt-1 text-sm text-gray-600">
-            {formatPrice(product.srp)}
-          </p>
-        ) : (
-          <p className="mt-1 text-xs text-gray-400">Contact for pricing</p>
-        )}
-        {/* Color dots — gray placeholder until color hex mapping is added */}
+        <div className="mt-1">
+          <PartnerPrice
+            srp={product.srp}
+            listingPrice={product.listingPrice}
+            bespokePrice={bespokePrice}
+            isPartner={isPartner}
+          />
+        </div>
         <div className="mt-2 flex gap-1">
           {product.variants.map((v) => (
             <span
