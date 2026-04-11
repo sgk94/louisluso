@@ -96,6 +96,39 @@ describe("Zoho CRM API", () => {
       });
     });
 
+    it("includes Region custom field when provided", async () => {
+      mockZohoFetch.mockResolvedValueOnce({
+        data: [
+          {
+            status: "success",
+            details: { id: "lead-789" },
+          },
+        ],
+      });
+
+      const input: CRMLeadInput = {
+        Company: "Bay Area Vision",
+        First_Name: "Kim",
+        Last_Name: "Lee",
+        Email: "kim@bayareavision.com",
+        Phone: "415-555-0100",
+        Street: "100 Market St",
+        City: "San Francisco",
+        State: "CA",
+        Zip_Code: "94102",
+        Region: "norcal",
+        Lead_Source: "Business Card",
+      };
+
+      const id = await createLead(input);
+
+      expect(id).toBe("lead-789");
+      expect(mockZohoFetch).toHaveBeenCalledWith("/crm/v6/Leads", {
+        method: "POST",
+        body: { data: [input] },
+      });
+    });
+
     it("throws when API response status is not success", async () => {
       mockZohoFetch.mockResolvedValueOnce({
         data: [

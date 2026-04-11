@@ -28,8 +28,31 @@ export interface CRMLeadInput {
   City: string;
   State: string;
   Zip_Code: string;
+  Region?: string;
   Lead_Source?: string;
   Description?: string;
+}
+
+export interface CRMLead {
+  id: string;
+  Company: string;
+  First_Name: string;
+  Last_Name: string;
+  Email: string;
+  Phone: string;
+  Street?: string;
+  City?: string;
+  State?: string;
+  Zip_Code?: string;
+  Region?: string;
+  Lead_Source?: string;
+  Description?: string;
+  [key: string]: unknown;
+}
+
+interface SearchLeadsResponse {
+  data: CRMLead[] | null;
+  info: { more_records: boolean };
 }
 
 export interface CRMContact {
@@ -132,6 +155,14 @@ export async function getContactByEmail(
 
   const contact = response.data?.[0];
   return contact ?? null;
+}
+
+export async function searchLeads(criteria: string): Promise<CRMLead[]> {
+  const response = await zohoFetch<SearchLeadsResponse>("/crm/v6/Leads/search", {
+    params: { criteria, per_page: "200" },
+  });
+
+  return response.data ?? [];
 }
 
 export async function attachFileToLead(
