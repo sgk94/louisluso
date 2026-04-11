@@ -1,0 +1,254 @@
+{
+  "version": "2026",
+  "lastUpdated": "2026-04-10",
+  "source": "https://docs.google.com/spreadsheets/d/1CDssE5KCQQGXGCiV1MWelLTAEFvGDpToDTcznJFemOk/edit?gid=612922586",
+  "collections": [
+    {
+      "name": "Eye Cloud",
+      "brand": "LOUISLUSO",
+      "skuMatch": "EK-*",
+      "listPrice": 57,
+      "status": "active"
+    },
+    {
+      "name": "Classic",
+      "brand": "LOUISLUSO",
+      "skuMatch": "LL-*",
+      "skuExclude": "LL3001+",
+      "listPrice": 65,
+      "status": "active"
+    },
+    {
+      "name": "Classic Plus",
+      "brand": "LOUISLUSO",
+      "skuMatch": "LL3001+",
+      "listPrice": 63,
+      "status": "active"
+    },
+    {
+      "name": "Junior",
+      "brand": "LOUISLUSO",
+      "skuMatch": "JN-*",
+      "listPrice": 71,
+      "status": "active"
+    },
+    {
+      "name": "Signature",
+      "brand": "LOUISLUSO",
+      "skuMatch": "SG-*",
+      "skuExclude": "SG4041-SG4048",
+      "listPrice": 76,
+      "status": "active"
+    },
+    {
+      "name": "Signature +",
+      "brand": "LOUISLUSO",
+      "skuMatch": "SP-*",
+      "listPrice": 81,
+      "status": "active"
+    },
+    {
+      "name": "London Series",
+      "brand": "LOUISLUSO",
+      "skuMatch": "LC-9015 to LC-9036",
+      "listPrice": 81,
+      "status": "active"
+    },
+    {
+      "name": "London Titanium",
+      "brand": "LOUISLUSO",
+      "skuMatch": "LC-9041 to LC-9045",
+      "listPrice": 97,
+      "status": "active"
+    },
+    {
+      "name": "Milan",
+      "brand": "LOUISLUSO",
+      "skuMatch": "ML-*",
+      "listPrice": 99,
+      "status": "active"
+    },
+    {
+      "name": "Grand Collection",
+      "brand": "LOUISLUSO",
+      "skuMatch": "GC-*",
+      "listPrice": 73,
+      "status": "active"
+    },
+    {
+      "name": "Rimless Air / Air-O",
+      "brand": "LOUISLUSO",
+      "skuMatch": "RA-*",
+      "listPrice": 68,
+      "status": "active"
+    },
+    {
+      "name": "LL Titanium (L-800, L-93)",
+      "brand": "LOUISLUSO",
+      "skuMatch": "L-800*, L-93*",
+      "listPrice": 89,
+      "status": "active"
+    },
+    {
+      "name": "LL Titanium (L-5000)",
+      "brand": "LOUISLUSO",
+      "skuMatch": "L-5000*",
+      "listPrice": 108,
+      "status": "active"
+    },
+    {
+      "name": "Urban",
+      "brand": "LOUISLUSO",
+      "skuMatch": "LU-*",
+      "skuExclude": "LU3001-LU3005",
+      "listPrice": 121,
+      "status": "active"
+    },
+    {
+      "name": "Skylite (SL2001-2007)",
+      "brand": "LOUISLUSO",
+      "skuMatch": "SL2001 to SL2007",
+      "listPrice": 12,
+      "noDiscount": true,
+      "noWarranty": true,
+      "status": "active"
+    },
+    {
+      "name": "Skylite (SL2008-2009)",
+      "brand": "LOUISLUSO",
+      "skuMatch": "SL2008, SL2009",
+      "listPrice": 15,
+      "noDiscount": true,
+      "noWarranty": true,
+      "status": "active"
+    },
+    {
+      "name": "2026 New Signature Series",
+      "brand": "LOUISLUSO",
+      "skuMatch": "SG4041 to SG4048",
+      "listPrice": 68,
+      "isNew": true,
+      "status": "active"
+    },
+    {
+      "name": "2026 New London Titanium",
+      "brand": "LOUISLUSO",
+      "skuMatch": "LC9050 to LC9055",
+      "listPrice": 99,
+      "isNew": true,
+      "status": "active"
+    },
+    {
+      "name": "2026 New Urban Titanium",
+      "brand": "LOUISLUSO",
+      "skuMatch": "LU3001 to LU3005",
+      "listPrice": 102,
+      "isNew": true,
+      "status": "active"
+    },
+    {
+      "name": "Tandy (standard)",
+      "brand": "TANDY",
+      "skuMatch": "TA-*",
+      "skuExclude": "TA-1144 to TA-1520, TA-1600, TA-1601, TA-1610 to TA-1618, TA-1631 to TA-1638, TA-7525, TA-7526",
+      "listPrice": 84,
+      "status": "active"
+    },
+    {
+      "name": "Tandy (TA-1610 to 1618, 7525, 7526)",
+      "brand": "TANDY",
+      "skuMatch": "TA-1610 to TA-1618, TA-7525, TA-7526",
+      "listPrice": 86,
+      "status": "active"
+    },
+    {
+      "name": "Tandy Titanium (1144-1520)",
+      "brand": "TANDY",
+      "skuMatch": "TA-1144 to TA-1520",
+      "listPrice": 108,
+      "status": "active"
+    },
+    {
+      "name": "Tandy Titanium (1600, 1601, 1631-1638)",
+      "brand": "TANDY",
+      "skuMatch": "TA-1600, TA-1601, TA-1631 to TA-1638",
+      "listPrice": 121,
+      "status": "active"
+    },
+    {
+      "name": "Veritas",
+      "brand": "VERITAS",
+      "skuMatch": "VT-*",
+      "listPrice": 51,
+      "status": "active"
+    },
+    {
+      "name": "SNF",
+      "brand": "SNF",
+      "skuMatch": "SNF-*",
+      "listPrice": 130,
+      "status": "active"
+    },
+    {
+      "name": "TANI",
+      "brand": "TANI",
+      "skuMatch": "T-*",
+      "listPrice": 59,
+      "status": "active"
+    },
+    {
+      "name": "Manomos Glasses",
+      "brand": "MANOMOS",
+      "skuMatch": "MANOMOS-*",
+      "pricingType": "per-model",
+      "models": {
+        "$138.24": ["Abbey", "Andy", "Brian", "Cloud", "Crikets", "Dreamer", "Earth", "Elvis", "Galaxy", "George", "Grass", "Gravity", "Jackie", "Jimi", "John", "Lady", "Land", "Liverpool", "Love", "Martin", "Mary", "Mercury B", "Mercury", "Milky", "Mini", "Mods", "Music", "Olivia", "Once", "Ourora", "Piano", "Play", "Pop", "Ringo", "Road", "Runa", "Rush", "Sally", "Sunny", "Swan", "Thirteen", "Thirty six", "Todd"],
+        "$159.50": ["Baby", "Button", "Cavern", "Coco", "Cosmos B", "Cosmos", "Pebble"],
+        "$176.00": ["Gentleman"],
+        "$192.50": ["Artist", "Bird", "Blue", "Jupiter"]
+      },
+      "status": "active",
+      "source": "MANOMOS PRICE LIST 2022-2023 (confirmed 2026)"
+    },
+    {
+      "name": "Manomos Sunglasses",
+      "brand": "MANOMOS",
+      "skuMatch": "MANOMOS-* Sunglass",
+      "pricingType": "per-model",
+      "models": {
+        "$138.24": ["Cuty", "Lolita", "Love me do", "Michelle", "Nova", "Orion"],
+        "$159.50": ["Astro", "Beast", "Billy", "Black", "Bossy", "City Pop", "Disco", "Harry", "Hey Jude", "House", "Jean", "Joy", "Lala", "Leon", "Let it be", "Mars", "Moon", "Rubber Soul", "Sing", "Sky", "Soul", "Stone", "Sun", "Tiffany", "Time", "Trap", "Twist", "Venus", "Yesterday"]
+      },
+      "status": "active",
+      "source": "MANOMOS PRICE LIST 2022-2023 (confirmed 2026)"
+    },
+    {
+      "name": "CLROTTE",
+      "brand": "CLROTTE",
+      "skuMatch": "CLROTTE-*",
+      "listPrice": 103,
+      "status": "discontinued"
+    },
+    {
+      "name": "Dr. Gram",
+      "brand": "DR. GRAM",
+      "skuMatch": "DG-*",
+      "listPrice": 146,
+      "status": "discontinued"
+    }
+  ],
+  "discountTiers": {
+    "standard": {
+      "label": "No minimum",
+      "percentage": 20
+    },
+    "volume": {
+      "label": "25 PCS and More",
+      "percentage": 30
+    }
+  },
+  "pending": [
+    "Close Out / ABBR — awaiting pricing",
+    "Accessories (Cases) — awaiting pricing"
+  ]
+}

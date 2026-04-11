@@ -3,7 +3,7 @@
 ## About
 E-commerce eyewear retailer (B2B wholesale to optical stores + B2C catalog). Domain registered through Bluehost, hosted on AWS (being migrated to Vercel).
 
-## New Website (in progress — Phase 4 complete)
+## New Website (in progress — Phase 5b complete)
 Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpowers/specs/2026-04-08-louisluso-website-redesign.md` for full spec.
 
 ### Stack
@@ -19,7 +19,7 @@ Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpower
 - **Newsletter:** Zoho Campaigns
 - **Email:** Gmail API (cs@louisluso.com)
 - **Fonts:** Cormorant Garamond (headings) + DM Sans (body) via next/font
-- **Testing:** Vitest, React Testing Library (162 tests)
+- **Testing:** Vitest, React Testing Library (196 tests)
 - **Package Manager:** pnpm
 
 ### Project Structure (new site files)
@@ -46,6 +46,9 @@ Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpower
 - `lib/dealers/types.ts` — Dealer type definitions
 - `lib/dealers/mock-data.ts` — 10 mock dealers (Chicago area, to be replaced with Zoho CRM)
 - `lib/dealers/distance.ts` — Haversine distance calculation + sort/filter by radius
+- `lib/portal/types.ts` — PartnerMetadata Zod schema + `isPartner()` type guard
+- `app/components/PartnerPrice.tsx` — Price display (SRP / listing / strikethrough+pill for bespoke)
+- `app/components/UserMenu.tsx` — Partner dropdown menu in nav
 - `proxy.ts` — Clerk middleware (protects /portal routes)
 - `__tests__/` — Vitest test files
 - `.env.local` — Local environment variables (gitignored)
@@ -62,7 +65,11 @@ Three-tier pricing from Zoho Inventory:
 2. **Public Catalog** — COMPLETE (collection pages, product grids, product detail, SRP26 pricing, Cloudinary images, 276 SSG pages)
 3. **Static Pages** — COMPLETE (design system, nav/footer, homepage, about, why, contact form, partner application, privacy/terms)
 4. **Dealer Locator** — COMPLETE (frontend: dark Mapbox map, dealer sidebar, contact modal, mock data; backend Zoho CRM integration deferred)
-5. **B2B Portal** — next (bespoke pricing, cart, quote/order, order history, favorites)
+5. **B2B Portal**
+   - **5a Portal Foundation** — COMPLETE (auto-matching via Zoho CRM, dashboard, account page, UserMenu, invite script)
+   - **5b Partner Pricing** — COMPLETE (listing price in catalog, PartnerPrice component, pricing API, "Find a Dealer" hidden for partners)
+   - **5c Cart/Quote** — next (Add to Quote button, cart state, quote builder, Zoho Sales Order creation)
+   - **5d Orders/Favorites** — order history, invoices, favorites, reorder
 6. **Polish & Launch** — GA4, image migration, DNS cutover, WordPress retirement
 
 ## Current Platform (WordPress — being replaced)
