@@ -40,6 +40,8 @@ function groupToProduct(
   const firstSku = group.items?.[0]?.sku ?? "";
   const dimensions = parseDimensions(firstSku);
 
+  const listingPrice = group.items?.[0]?.rate ?? 0;
+
   let srp: number | null = null;
   const firstItemWithSrp = group.items?.find((item) => srpLookup[item.item_id]);
   if (firstItemWithSrp) {
@@ -65,6 +67,7 @@ function groupToProduct(
     slug: group.group_name.toLowerCase(),
     name: group.group_name,
     srp,
+    listingPrice,
     image: getProductImageUrl(group.group_name),
     variants,
     dimensions,

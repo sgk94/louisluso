@@ -11,6 +11,7 @@ function makeProduct(overrides: Partial<CatalogProduct> = {}): CatalogProduct {
     slug: "sg-1011",
     name: "SG-1011",
     srp: 227,
+    listingPrice: 76,
     image: "/images/placeholder-frame.svg",
     variants: [
       { id: "v1", colorCode: "C1", colorName: "Black Glossed", inStock: true, image: null },

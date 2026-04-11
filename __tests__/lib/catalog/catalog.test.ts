@@ -175,6 +175,14 @@ describe("getCollectionProducts", () => {
     expect(result!.products[0].srp).toBe(227); // fallbackSrp from collection config
   });
 
+  it("includes listingPrice from item.rate", async () => {
+    makeItemGroups();
+    makeSrpPriceBooks();
+    const result = await getCollectionProducts("signature-series");
+    expect(result).not.toBeNull();
+    expect(result!.products[0].listingPrice).toBe(76);
+  });
+
   it("excludes discontinued brands", async () => {
     makeItemGroups();
     makeSrpPriceBooks();

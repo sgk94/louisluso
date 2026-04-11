@@ -19,6 +19,7 @@ export interface CatalogProduct {
   slug: string;
   name: string;
   srp: number | null;
+  listingPrice: number;
   image: string | null;
   variants: CatalogVariant[];
   dimensions: CatalogDimensions | null;
