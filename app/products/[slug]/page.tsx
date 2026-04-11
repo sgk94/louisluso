@@ -2,8 +2,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getProductBySlug, getAllProductSlugs } from "@/lib/catalog/catalog";
-import { formatPrice } from "@/lib/catalog/format";
 import { VariantSelector } from "./VariantSelector";
+import { currentUser } from "@clerk/nextjs/server";
+import { isPartner } from "@/lib/portal/types";
+import { PartnerPrice } from "@/app/components/PartnerPrice";
 
 export const revalidate = 900; // ISR: 15 minutes
 
@@ -37,6 +39,8 @@ export default async function ProductDetailPage({
   if (!data) notFound();
 
   const { product, collection } = data;
+  const user = await currentUser();
+  const partner = user ? isPartner(user.publicMetadata) : false;
   const categoryPath =
     collection.category === "sunglasses" ? "/sunglasses" : "/eyeglasses";
 
@@ -68,11 +72,15 @@ export default async function ProductDetailPage({
             {product.name}
           </h1>
 
-          {product.srp !== null ? (
-            <p className="mt-2 text-xl">{formatPrice(product.srp)}</p>
-          ) : (
-            <p className="mt-2 text-sm text-gray-400">Contact for pricing</p>
-          )}
+          <div className="mt-2">
+            <PartnerPrice
+              srp={product.srp}
+              listingPrice={product.listingPrice}
+              bespokePrice={null}
+              isPartner={partner}
+              size="lg"
+            />
+          </div>
 
           <div className="mt-8 border-t border-gray-200 pt-6">
             <h2 className="text-xs font-medium uppercase tracking-wide text-gray-500">
@@ -106,14 +114,16 @@ export default async function ProductDetailPage({
             </dl>
           </div>
 
-          <div className="mt-8">
-            <Link
-              href="/find-a-dealer"
-              className="inline-block w-full border border-black px-8 py-3 text-center text-sm font-medium uppercase tracking-wide transition-colors hover:bg-black hover:text-white"
-            >
-              Find Nearest Dealer
-            </Link>
-          </div>
+          {!partner && (
+            <div className="mt-8">
+              <Link
+                href="/find-a-dealer"
+                className="inline-block w-full border border-black px-8 py-3 text-center text-sm font-medium uppercase tracking-wide transition-colors hover:bg-black hover:text-white"
+              >
+                Find Nearest Dealer
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </main>
