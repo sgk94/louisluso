@@ -69,6 +69,13 @@ describe("cart state", () => {
     expect(cart[0].quantity).toBe(8);
   });
 
+  it("addItems does not mutate input cart", () => {
+    const existing = [{ ...item1, quantity: 3 }];
+    const snapshot = JSON.parse(JSON.stringify(existing));
+    addItems(existing, [{ ...item1, quantity: 5 }]);
+    expect(existing).toEqual(snapshot);
+  });
+
   it("updateQuantity changes item quantity", () => {
     const cart = updateQuantity([item1, item2], "item-1", 20);
     expect(cart.find((i) => i.itemId === "item-1")?.quantity).toBe(20);

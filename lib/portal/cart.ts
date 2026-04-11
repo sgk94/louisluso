@@ -30,11 +30,11 @@ export function addItems(
   cart: CartItem[],
   newItems: CartItem[]
 ): CartItem[] {
-  const result = [...cart];
+  let result = cart.map((i) => ({ ...i }));
   for (const item of newItems) {
-    const existing = result.find((i) => i.itemId === item.itemId);
-    if (existing) {
-      existing.quantity += item.quantity;
+    const idx = result.findIndex((i) => i.itemId === item.itemId);
+    if (idx >= 0) {
+      result[idx] = { ...result[idx], quantity: result[idx].quantity + item.quantity };
     } else {
       result.push({ ...item });
     }
