@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { currentUser } from "@clerk/nextjs/server";
 import { getCollectionProducts } from "@/lib/catalog/catalog";
 import { getCollectionBySlug, getCollectionsByCategory } from "@/lib/catalog/collections";
 import { ProductGrid } from "@/app/components/ProductGrid";
+import { isPartner } from "@/lib/portal/types";
 
 export const revalidate = 900; // ISR: 15 minutes
 
@@ -40,6 +42,9 @@ export default async function SunglassesCollectionPage({
 
   if (!data) notFound();
 
+  const user = await currentUser();
+  const partner = user ? isPartner(user.publicMetadata) : false;
+
   return (
     <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <nav className="mb-6 text-sm text-gray-500">
@@ -63,7 +68,7 @@ export default async function SunglassesCollectionPage({
         {data.collection.material} frames
       </p>
 
-      <ProductGrid products={data.products} />
+      <ProductGrid products={data.products} isPartner={partner} />
     </main>
   );
 }
