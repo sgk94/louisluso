@@ -1,16 +1,16 @@
 ---
 name: business-card-scan
-description: Scan a business card photo and extract contact info into the Louis Luso customer Google Sheet and contacts.json. Use this skill whenever the user provides a business card image, mentions scanning a card, wants to add a contact from a card, or says anything about business cards, name cards, or contact cards — even if they don't say "scan" explicitly.
+description: Scan a business card photo and extract contact info into Zoho CRM (primary) and Google Sheet (backup view). Use this skill whenever the user provides a business card image, mentions scanning a card, wants to add a contact from a card, or says anything about business cards, name cards, or contact cards — even if they don't say "scan" explicitly.
 allowed-tools: Bash, Read, Write, Edit
 ---
 
 # Business Card Scanner
 
-Extract contact information from business card photos and add them to the Louis Luso customer database (Google Sheet + local contacts.json).
+Extract contact information from business card photos and add them to Zoho CRM (primary) + Google Sheet (Ken's view).
 
 ## How it works
 
-You receive a business card image. You read every piece of text on the card using your vision capability, map it to the contact fields below, show the user for confirmation, then run the append script.
+You receive a business card image. You read every piece of text on the card using your vision capability, map it to the contact fields below, enrich the location data, show the user for confirmation, then run the append script.
 
 ## Step 1: Extract all text from the card
 
@@ -20,30 +20,39 @@ Business cards vary wildly in layout. Some put the name huge and centered, other
 
 If the card is in a language other than English, extract the text as-is and also provide an English translation where helpful (e.g., for the company name or title).
 
-## Step 2: Map to contact fields
+## Step 2: Map to contact fields and enrich location
 
-Map extracted text to these fields. The column order matches the Google Sheet exactly.
+Map extracted text to these fields:
 
-| Field | Column | What goes here |
-|-------|--------|---------------|
-| Name | A | Full name (first + last) |
-| Email | B | Email address — required, skip the card if missing |
-| Company | C | Company or practice name |
-| Type | D | Business type if apparent (e.g., "optician", "distributor", "optical store") |
-| Role | E | Job title / position |
-| Location | F | City, State or general location |
-| Tags | G | Default: `business-card` — add context tags like trade show name if mentioned |
-| Source | H | Where the card was collected (ask user if not obvious, default: `business-card`) |
-| Notes | I | Anything that doesn't fit other fields — fax, second phone, social handles, tagline |
-| Phone | M | Primary phone number |
-| Website | N | Website URL |
-| Address | O | Full street address |
+| Field | What goes here |
+|-------|---------------|
+| Name | Full name (first + last) |
+| Email | Email address — required, skip the card if missing |
+| Company | Company or practice name |
+| Type | Business type if apparent (e.g., "optician", "distributor", "optical store") |
+| Role | Job title / position |
+| Location | City, State or general location |
+| Tags | Default: `business-card` — add context tags like trade show name if mentioned |
+| Source | Where the card was collected (ask user if not obvious, default: `business-card`) |
+| Notes | Anything that doesn't fit other fields — fax, second phone, social handles, tagline |
+| Phone | Primary phone number |
+| Website | Website URL |
+| Address | Full street address |
+| State | Two-letter state abbreviation (e.g., CA, TX) — parse from address or city line |
+| City | City name — parse from address or city line |
+| Zip | ZIP code — parse from address. If only city+state available, check knowledge base |
 
-Fields J (Status), K (Email Count), L (Last Contacted) are set automatically by the script.
+**Location enrichment:** If the card has city + state but no zip code, check the knowledge base by running:
+```bash
+npx tsx -e "import { lookupCity } from './lib/crm/regions.js'; const r = lookupCity('CITY', 'STATE'); console.log(r ? JSON.stringify(r) : 'not found')"
+```
+If found, use the stored zip. If not found, leave zip blank — it'll get filled in next time we see that city with a zip.
+
+**Region auto-assign:** The append script handles this automatically from the zip code. You don't need to figure out the region — just show it in the confirmation table if it resolves.
 
 ## Step 3: Show for confirmation
 
-Present the extracted data in a clean table so the user can review it before it gets saved. Format:
+Present the extracted data in a clean table so the user can review it before it gets saved:
 
 ```
 Extracted from business card:
@@ -54,6 +63,10 @@ Company:  ABC Optical
 Type:     optical store
 Role:     Owner
 Location: Dallas, TX
+State:    TX
+City:     Dallas
+Zip:      75201
+Region:   dallas (auto-assigned)
 Tags:     business-card; vision-expo-2026
 Source:   business-card
 Notes:    Fax: 555-0199
@@ -62,11 +75,11 @@ Website:  abcoptical.com
 Address:  123 Main St, Dallas, TX 75201
 ```
 
-Ask: "Look good? I'll add this to the sheet and contacts. Let me know if anything needs fixing."
+Ask: "Look good? I'll add this to Zoho CRM and the Sheet. Let me know if anything needs fixing."
 
-If the card has no email address, tell the user and ask if they want to proceed anyway or skip it. Email is the key identifier in the contact system — without it, the contact can't be enrolled in sequences.
+If the card has no email address, tell the user and ask if they want to proceed anyway or skip it.
 
-## Step 4: Append to sheet and contacts
+## Step 4: Write to Zoho CRM + Sheet + knowledge base
 
 Once confirmed, run:
 
@@ -88,11 +101,18 @@ Where `<JSON>` is a single-line JSON string with these fields:
   "notes": "Fax: 555-0199",
   "phone": "(555) 555-0123",
   "website": "abcoptical.com",
-  "address": "123 Main St, Dallas, TX 75201"
+  "address": "123 Main St, Dallas, TX 75201",
+  "state": "TX",
+  "city": "Dallas",
+  "zip": "75201"
 }
 ```
 
-The script appends to Google Sheet `1xWFgNlWI0GKnwPJ-btI9Yx9MaWaEwx42P-gQWnxQwpw` and adds to `email/contacts.json`.
+The script will:
+1. Auto-assign region from zip code
+2. Create a Lead in Zoho CRM (with state, city, zip, region fields)
+3. Append a row to Google Sheet (Ken's view)
+4. Update the location knowledge base (if new city+state+zip combo)
 
 ## Batch mode
 
@@ -100,13 +120,17 @@ If the user provides multiple card images at once, process them one at a time �
 
 ## Edge cases
 
-- **No email on card**: Flag it. Ask if user wants to add anyway (sheet-only, won't be enrollable in sequences) or skip.
-- **Duplicate email**: The script will skip duplicates in contacts.json but still append to the sheet. Mention this to the user.
+- **No email on card**: Flag it. Ask if user wants to add anyway (CRM + sheet, but won't be enrollable in email sequences) or skip.
+- **Duplicate email**: Zoho CRM allows duplicate leads. Mention this to the user if you suspect a duplicate.
 - **Low quality / unreadable text**: Tell the user which parts you couldn't read. Ask them to fill in the gaps.
 - **Multiple people on one card**: Rare, but create separate entries for each person if it happens.
+- **No address at all**: Set state, city, zip to empty. The contact gets `region: null` — it can be tagged manually later.
+- **City + state but no zip**: Check knowledge base (Step 2). If not found, leave zip blank. Region won't auto-assign but city/state are still searchable.
 
 ## Key files
 
-- `scripts/append-contact.ts` — Appends contact to Google Sheet + contacts.json
-- `email/contacts.json` — Local contact directory (gitignored)
+- `scripts/append-contact.ts` — Writes to Zoho CRM + Google Sheet + updates knowledge base
+- `lib/crm/regions.ts` — Region config, zip matching, knowledge base read/write
+- `lib/zoho/crm.ts` — Zoho CRM API (createLead)
+- `data/location-kb.json` — Location knowledge base (grows over time)
 - `email/gmail.ts` — Google Sheets API client (OAuth2)
