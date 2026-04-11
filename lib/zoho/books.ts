@@ -115,3 +115,33 @@ export async function getInvoicesForContact(
   });
   return response.invoices;
 }
+
+export interface ZohoEstimate {
+  estimate_id: string;
+  estimate_number: string;
+}
+
+interface EstimateResponse {
+  estimate: ZohoEstimate;
+}
+
+export async function createEstimate(
+  customerId: string,
+  lineItems: LineItem[],
+  notes?: string,
+): Promise<ZohoEstimate> {
+  const body: Record<string, unknown> = {
+    customer_id: customerId,
+    line_items: lineItems,
+  };
+
+  if (notes !== undefined) {
+    body.notes = notes;
+  }
+
+  const response = await zohoFetch<EstimateResponse>(
+    "/books/v3/estimates",
+    { method: "POST", body },
+  );
+  return response.estimate;
+}
