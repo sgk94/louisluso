@@ -1,9 +1,10 @@
 import "dotenv/config";
 import { getSheetsClient } from "../email/gmail.js";
-import { loadContacts, saveContacts, type Contact } from "../email/contacts.js";
+import { createLead, type CRMLeadInput } from "../lib/zoho/crm.js";
+import { matchRegion, lookupCity, updateKnowledgeBase } from "../lib/crm/regions.js";
 
 const SHEET_ID = "1xWFgNlWI0GKnwPJ-btI9Yx9MaWaEwx42P-gQWnxQwpw";
-const SHEET_RANGE = "Sheet1!A:O";
+const SHEET_RANGE = "Sheet1!A:P";
 
 interface CardContact {
   name: string;
@@ -18,6 +19,9 @@ interface CardContact {
   phone: string;
   website: string;
   address: string;
+  state: string;
+  city: string;
+  zip: string;
 }
 
 function parseArgs(): CardContact {
@@ -40,12 +44,67 @@ function parseArgs(): CardContact {
     phone: parsed.phone ?? "",
     website: parsed.website ?? "",
     address: parsed.address ?? "",
+    state: parsed.state ?? "",
+    city: parsed.city ?? "",
+    zip: parsed.zip ?? "",
   };
 }
 
-async function appendToSheet(contact: CardContact): Promise<void> {
+function enrichLocation(contact: CardContact): { state: string; city: string; zip: string; region: string | null } {
+  let { state, city, zip } = contact;
+
+  // If we have city + state but no zip, try the knowledge base
+  if (city && state && !zip) {
+    const known = lookupCity(city, state);
+    if (known) {
+      zip = known.zip;
+      console.log(`KB: resolved ${city}, ${state} → zip ${zip}`);
+    }
+  }
+
+  // Auto-assign region from zip
+  const region = matchRegion(zip);
+
+  return { state, city, zip, region };
+}
+
+function splitName(name: string): { first: string; last: string } {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 0) return { first: "", last: "" };
+  if (parts.length === 1) return { first: parts[0], last: "" };
+  return { first: parts[0], last: parts.slice(1).join(" ") };
+}
+
+async function writeToZohoCRM(contact: CardContact, location: { state: string; city: string; zip: string; region: string | null }): Promise<string> {
+  const { first, last } = splitName(contact.name);
+
+  const leadInput: CRMLeadInput = {
+    Company: contact.company || "Unknown",
+    First_Name: first,
+    Last_Name: last || first, // Zoho requires Last_Name
+    Email: contact.email,
+    Phone: contact.phone,
+    Street: contact.address,
+    City: location.city,
+    State: location.state,
+    Zip_Code: location.zip,
+    Region: location.region ?? undefined,
+    Lead_Source: contact.source === "business-card" ? "Business Card" : contact.source,
+    Description: [
+      contact.role ? `Role: ${contact.role}` : "",
+      contact.type ? `Type: ${contact.type}` : "",
+      contact.website ? `Website: ${contact.website}` : "",
+      contact.notes,
+    ].filter(Boolean).join(" | "),
+  };
+
+  const leadId = await createLead(leadInput);
+  console.log(`CRM: created lead ${leadId} for ${contact.name} (${contact.email})`);
+  return leadId;
+}
+
+async function appendToSheet(contact: CardContact, location: { state: string; city: string; zip: string; region: string | null }): Promise<void> {
   const sheets = getSheetsClient();
-  const now = new Date().toISOString().split("T")[0];
   const row = [
     contact.name,
     contact.email,
@@ -56,12 +115,13 @@ async function appendToSheet(contact: CardContact): Promise<void> {
     contact.tags.join(";"),
     contact.source,
     contact.notes,
-    "new",          // Status
-    "0",            // Email Count
-    "",             // Last Contacted
+    "new",
+    "0",
+    "",
     contact.phone,
     contact.website,
     contact.address,
+    location.region ?? "",  // Region (new column P)
   ];
 
   await sheets.spreadsheets.values.append({
@@ -74,42 +134,6 @@ async function appendToSheet(contact: CardContact): Promise<void> {
   console.log(`Sheet: appended row for ${contact.name} (${contact.email})`);
 }
 
-function addToContacts(contact: CardContact): void {
-  const existing = loadContacts();
-  const emailLower = contact.email.toLowerCase().trim();
-
-  if (existing.some((c) => c.email.toLowerCase() === emailLower)) {
-    console.log(`Contacts: skipped ${contact.email} (already exists)`);
-    return;
-  }
-
-  const now = new Date().toISOString();
-  const newContact: Contact = {
-    email: emailLower,
-    name: contact.name,
-    company: contact.company,
-    type: contact.type,
-    role: contact.role,
-    location: contact.location,
-    tags: contact.tags,
-    source: contact.source,
-    notes: [
-      contact.notes,
-      contact.phone ? `Phone: ${contact.phone}` : "",
-      contact.website ? `Website: ${contact.website}` : "",
-      contact.address ? `Address: ${contact.address}` : "",
-    ].filter(Boolean).join(" | "),
-    status: "new",
-    emailCount: 0,
-    lastContacted: "",
-    createdAt: now,
-  };
-
-  existing.push(newContact);
-  saveContacts(existing);
-  console.log(`Contacts: added ${contact.name} (${contact.email})`);
-}
-
 async function main(): Promise<void> {
   const contact = parseArgs();
 
@@ -118,8 +142,27 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  await appendToSheet(contact);
-  addToContacts(contact);
+  // Enrich location from knowledge base
+  const location = enrichLocation(contact);
+
+  if (location.region) {
+    console.log(`Region: ${location.region}`);
+  } else {
+    console.log("Region: none (no matching zip prefix)");
+  }
+
+  // Write to Zoho CRM (primary)
+  await writeToZohoCRM(contact, location);
+
+  // Append to Google Sheet (Ken's readable view)
+  await appendToSheet(contact, location);
+
+  // Update knowledge base if we have city + state + zip
+  if (location.city && location.state && location.zip) {
+    updateKnowledgeBase(location.city, location.state, location.zip, location.region);
+    console.log(`KB: saved ${location.city}, ${location.state} → ${location.zip} (${location.region ?? "no region"})`);
+  }
+
   console.log("Done.");
 }
 
