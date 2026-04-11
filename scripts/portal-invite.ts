@@ -33,7 +33,8 @@ async function main(): Promise<void> {
     }
   }
 
-  if (!email || !email.includes("@")) {
+  const { z } = await import("zod");
+  if (!email || !z.string().email().safeParse(email).success) {
     console.error("Usage: pnpm portal:invite -- --email dealer@store.com [--dry-run]");
     process.exit(1);
   }
@@ -54,7 +55,7 @@ async function main(): Promise<void> {
 
   console.log(`Found: ${firstName} ${contact.Last_Name} — ${company}`);
 
-  const signupUrl = "https://louisluso.com/sign-up";
+  const signupUrl = process.env.PORTAL_SIGNUP_URL ?? "https://louisluso.com/sign-up";
 
   const subject = "Welcome to the LOUISLUSO Partner Portal";
   const body = [

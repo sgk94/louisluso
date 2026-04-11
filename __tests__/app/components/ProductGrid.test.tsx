@@ -11,6 +11,7 @@ function makeProduct(name: string, slug: string): CatalogProduct {
     slug,
     name,
     srp: 227,
+    listingPrice: 76,
     image: "/images/placeholder-frame.svg",
     variants: [
       { id: `${slug}-v1`, colorCode: "C1", colorName: "Black", inStock: true, image: null },

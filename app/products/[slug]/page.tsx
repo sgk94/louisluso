@@ -7,7 +7,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { isPartner } from "@/lib/portal/types";
 import { PartnerPrice } from "@/app/components/PartnerPrice";
 
-export const revalidate = 900; // ISR: 15 minutes
+export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ slug: string }>;

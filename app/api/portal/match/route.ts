@@ -4,7 +4,7 @@ import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import { getContactByEmail } from "@/lib/zoho/crm";
 import { rateLimit } from "@/lib/rate-limit";
 
-export async function POST(): Promise<NextResponse> {
+export async function POST(_request: Request): Promise<NextResponse> {
   const headerList = await headers();
   const ip = headerList.get("x-forwarded-for")?.split(",")[0] ?? "anonymous";
   const { success: rateLimitOk } = await rateLimit(ip);
@@ -32,6 +32,10 @@ export async function POST(): Promise<NextResponse> {
     zohoContactId: contact.id,
     company: contact.Account_Name,
   };
+  const pricingPlanId = (contact as Record<string, unknown>).Pricing_Plan_Id;
+  if (typeof pricingPlanId === "string" && pricingPlanId) {
+    metadata.pricingPlanId = pricingPlanId;
+  }
 
   const client = await clerkClient();
   await client.users.updateUserMetadata(user.id, {

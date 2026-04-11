@@ -22,19 +22,25 @@ export default async function PortalLayout({
     try {
       const contact = await getContactByEmail(email);
       if (contact) {
+        const metadata: Record<string, string> = {
+          role: "partner",
+          zohoContactId: contact.id,
+          company: contact.Account_Name,
+        };
+        const pricingPlanId = (contact as Record<string, unknown>).Pricing_Plan_Id;
+        if (typeof pricingPlanId === "string" && pricingPlanId) {
+          metadata.pricingPlanId = pricingPlanId;
+        }
+
         const client = await clerkClient();
         await client.users.updateUserMetadata(user.id, {
-          publicMetadata: {
-            role: "partner",
-            zohoContactId: contact.id,
-            company: contact.Account_Name,
-          },
+          publicMetadata: metadata,
         });
-        // Redirect to refresh metadata
         redirect("/portal");
       }
-    } catch {
-      // CRM lookup failed — fall through to pending
+    } catch (error) {
+      if (error && typeof error === "object" && "digest" in error) throw error;
+      console.error("CRM auto-match failed:", error);
     }
   }
 

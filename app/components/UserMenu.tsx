@@ -65,7 +65,7 @@ export function UserMenu(): React.ReactElement {
           <div className="my-1 border-t border-white/10" />
 
           <button
-            onClick={() => signOut()}
+            onClick={() => signOut({ redirectUrl: "/" })}
             className="block w-full px-4 py-2 text-left text-xs text-gray-400 transition-colors hover:bg-white/[0.04] hover:text-red-400"
           >
             Sign Out

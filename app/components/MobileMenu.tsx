@@ -86,10 +86,12 @@ export function MobileMenu({ eyeglassesCollections, sunglassesCollections, isPar
               </Link>
 
               <div className="border-t border-gray-200 pt-4">
-                <Link href="/become-a-partner" onClick={() => setOpen(false)} className="block text-sm text-gray-500 hover:text-bronze">
-                  Become a Partner
-                </Link>
-                <Link href="/contact" onClick={() => setOpen(false)} className="mt-2 block text-sm text-gray-500 hover:text-bronze">
+                {!isPartner && (
+                  <Link href="/become-a-partner" onClick={() => setOpen(false)} className="block text-sm text-gray-500 hover:text-bronze">
+                    Become a Partner
+                  </Link>
+                )}
+                <Link href="/contact" onClick={() => setOpen(false)} className={`block text-sm text-gray-500 hover:text-bronze ${!isPartner ? "mt-2" : ""}`}>
                   Contact Us
                 </Link>
               </div>

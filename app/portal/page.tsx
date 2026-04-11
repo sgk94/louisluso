@@ -1,6 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
-import type { PartnerMetadata } from "@/lib/portal/types";
+import { isPartner } from "@/lib/portal/types";
 
 export const metadata = {
   title: "Partner Dashboard | LOUISLUSO",
@@ -8,7 +8,7 @@ export const metadata = {
 
 export default async function PortalDashboard(): Promise<React.ReactElement> {
   const user = await currentUser();
-  const meta = user?.publicMetadata as PartnerMetadata;
+  const meta = isPartner(user?.publicMetadata) ? user!.publicMetadata : null;
   const firstName = user?.firstName ?? "Partner";
 
   const cards = [
@@ -38,7 +38,7 @@ export default async function PortalDashboard(): Promise<React.ReactElement> {
         <h1 className="font-heading text-3xl text-white">
           Welcome back, {firstName}
         </h1>
-        <p className="mt-1 text-sm text-bronze">{meta.company}</p>
+        <p className="mt-1 text-sm text-bronze">{meta?.company}</p>
 
         <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-3">
           {cards.map((card) => (

@@ -120,7 +120,8 @@ export async function getContactById(
 export async function getContactByEmail(
   email: string,
 ): Promise<CRMContact | null> {
-  if (!email.includes("@")) {
+  const emailCheck = z.string().email().safeParse(email);
+  if (!emailCheck.success) {
     throw new Error("Invalid email");
   }
 

@@ -7,7 +7,7 @@ import { getCollectionBySlug, getCollectionsByCategory } from "@/lib/catalog/col
 import { ProductGrid } from "@/app/components/ProductGrid";
 import { isPartner } from "@/lib/portal/types";
 
-export const revalidate = 900; // ISR: 15 minutes
+export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ collection: string }>;

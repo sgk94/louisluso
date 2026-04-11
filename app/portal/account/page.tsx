@@ -1,55 +1,27 @@
-"use client";
+import { currentUser } from "@clerk/nextjs/server";
+import { getContactById } from "@/lib/zoho/crm";
+import { isPartner } from "@/lib/portal/types";
 
-import { useState, useEffect } from "react";
+export const metadata = {
+  title: "Account | LOUISLUSO",
+};
 
-interface AccountInfo {
-  company: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zip: string;
-  };
-  pricingTier: string;
-}
+export default async function AccountPage(): Promise<React.ReactElement> {
+  const user = await currentUser();
+  const meta = isPartner(user?.publicMetadata) ? user!.publicMetadata : null;
 
-export default function AccountPage(): React.ReactElement {
-  const [account, setAccount] = useState<AccountInfo | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    async function fetchAccount(): Promise<void> {
-      try {
-        const res = await fetch("/api/portal/account");
-        if (!res.ok) {
-          setError(true);
-          return;
-        }
-        const data = await res.json();
-        setAccount(data);
-      } catch {
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchAccount();
-  }, []);
-
-  if (loading) {
+  if (!meta) {
     return (
       <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#0a0a0a]">
-        <p className="text-sm text-gray-500">Loading account...</p>
+        <p className="text-sm text-gray-400">Unable to load account info.</p>
       </main>
     );
   }
 
-  if (error || !account) {
+  let contact;
+  try {
+    contact = await getContactById(meta.zohoContactId);
+  } catch {
     return (
       <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#0a0a0a]">
         <p className="text-sm text-gray-400">Unable to load account info.</p>
@@ -58,20 +30,20 @@ export default function AccountPage(): React.ReactElement {
   }
 
   const fields = [
-    { label: "Company", value: account.company },
-    { label: "Contact", value: `${account.firstName} ${account.lastName}` },
-    { label: "Email", value: account.email },
-    { label: "Phone", value: account.phone },
+    { label: "Company", value: contact.Account_Name },
+    { label: "Contact", value: `${contact.First_Name} ${contact.Last_Name}` },
+    { label: "Email", value: contact.Email },
+    { label: "Phone", value: contact.Phone },
     {
       label: "Address",
       value: [
-        account.address.street,
-        `${account.address.city}, ${account.address.state} ${account.address.zip}`,
+        contact.Mailing_Street,
+        `${contact.Mailing_City}, ${contact.Mailing_State} ${contact.Mailing_Zip}`,
       ]
         .filter(Boolean)
         .join("\n"),
     },
-    { label: "Pricing Tier", value: account.pricingTier },
+    { label: "Pricing Tier", value: meta.pricingPlanId ? "Custom" : "Standard" },
   ];
 
   return (
