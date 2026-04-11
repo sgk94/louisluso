@@ -13,7 +13,7 @@ Unlock partner features on the existing site via Clerk auth. No separate portal 
 3. Ken runs `pnpm portal:invite --email dealer@store.com` → branded approval email via Gmail API
 4. Partner clicks signup link → Clerk hosted sign-up page (email + password only)
 5. First `/portal` visit → system auto-matches email to Zoho CRM Contact
-6. Match found → sets Clerk `publicMetadata`: role, zohoContactId, company, priceListId (if assigned)
+6. Match found → sets Clerk `publicMetadata`: role, zohoContactId, company, pricingPlanId (if assigned)
 7. Partner is fully set up — zero manual Clerk metadata entry
 
 ---
@@ -29,7 +29,7 @@ Triggered on portal access when user has no `role: "partner"` in metadata.
 3. If no role → call Zoho CRM API: search Contacts by user's email
 4. **Match found:**
    - Set Clerk `publicMetadata`: `{ role: "partner", zohoContactId: "<id>", company: "<Account_Name>" }`
-   - If Ken assigned a Price List in Zoho for this Contact → also set `priceListId`
+   - If Ken assigned a Price List in Zoho for this Contact → also set `pricingPlanId`
    - Proceed to portal
 5. **No match:**
    - Show "Account pending approval" page
@@ -44,7 +44,7 @@ interface PartnerMetadata {
   role: "partner";
   zohoContactId: string;
   company: string;
-  priceListId?: string; // optional — omit = listing price (item.rate)
+  pricingPlanId?: string; // optional — omit = listing price (item.rate)
 }
 ```
 

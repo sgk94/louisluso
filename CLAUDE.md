@@ -51,6 +51,12 @@ Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpower
 - `.env.local` — Local environment variables (gitignored)
 - `.env.local.example` — Template for env vars
 
+### Pricing Model
+Three-tier pricing from Zoho Inventory:
+- **Listing price** (`item.rate`) — wholesale base price on each Zoho item. Default for B2B partners.
+- **SRP** ("SRP26" Price Book) — suggested retail price. Shown on public site.
+- **Bespoke** (Ken-assigned Price Book per partner) — custom rates via `pricingPlanId` in Clerk metadata. Overrides listing price for that partner.
+
 ### Phases
 1. **Foundation** — COMPLETE (scaffold, Zoho APIs, Clerk auth, rate limiting, Vercel deploy)
 2. **Public Catalog** — COMPLETE (collection pages, product grids, product detail, SRP26 pricing, Cloudinary images, 276 SSG pages)

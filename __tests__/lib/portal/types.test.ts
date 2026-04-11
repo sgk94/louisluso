@@ -7,12 +7,12 @@ describe("partnerMetadataSchema", () => {
       role: "partner",
       zohoContactId: "12345",
       company: "Brilliant Eye Care",
-      priceListId: "67890",
+      pricingPlanId: "67890",
     });
     expect(result.success).toBe(true);
   });
 
-  it("validates without optional priceListId", () => {
+  it("validates without optional pricingPlanId", () => {
     const result = partnerMetadataSchema.safeParse({
       role: "partner",
       zohoContactId: "12345",

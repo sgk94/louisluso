@@ -4,7 +4,7 @@ export const partnerMetadataSchema = z.object({
   role: z.literal("partner"),
   zohoContactId: z.string().min(1),
   company: z.string().min(1),
-  priceListId: z.string().optional(),
+  pricingPlanId: z.string().optional(),
 });
 
 export type PartnerMetadata = z.infer<typeof partnerMetadataSchema>;

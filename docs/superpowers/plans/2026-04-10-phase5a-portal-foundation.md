@@ -4,7 +4,7 @@
 
 **Goal:** Build the partner auth flow (auto-matching via Zoho CRM), portal dashboard, account page, user menu in navigation, and invite script — so approved dealers can sign up and access the B2B portal.
 
-**Architecture:** Clerk handles auth. On first portal visit, the system auto-matches the user's email to a Zoho CRM Contact and sets Clerk metadata (role, zohoContactId, company, priceListId). Navigation shows a user menu dropdown for logged-in partners. Dashboard is minimal with quick-action cards. Account page is read-only, pulling data from Zoho CRM.
+**Architecture:** Clerk handles auth. On first portal visit, the system auto-matches the user's email to a Zoho CRM Contact and sets Clerk metadata (role, zohoContactId, company, pricingPlanId). Navigation shows a user menu dropdown for logged-in partners. Dashboard is minimal with quick-action cards. Account page is read-only, pulling data from Zoho CRM.
 
 **Tech Stack:** Next.js 16 App Router, Clerk (auth + metadata), Zoho CRM v6 API, Gmail API, Vitest
 
@@ -49,12 +49,12 @@ describe("partnerMetadataSchema", () => {
       role: "partner",
       zohoContactId: "12345",
       company: "Brilliant Eye Care",
-      priceListId: "67890",
+      pricingPlanId: "67890",
     });
     expect(result.success).toBe(true);
   });
 
-  it("validates without optional priceListId", () => {
+  it("validates without optional pricingPlanId", () => {
     const result = partnerMetadataSchema.safeParse({
       role: "partner",
       zohoContactId: "12345",
@@ -106,7 +106,7 @@ export const partnerMetadataSchema = z.object({
   role: z.literal("partner"),
   zohoContactId: z.string().min(1),
   company: z.string().min(1),
-  priceListId: z.string().optional(),
+  pricingPlanId: z.string().optional(),
 });
 
 export type PartnerMetadata = z.infer<typeof partnerMetadataSchema>;
@@ -569,7 +569,7 @@ export async function GET(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "Not a partner" }, { status: 403 });
   }
 
-  const { zohoContactId, priceListId } = user.publicMetadata;
+  const { zohoContactId, pricingPlanId } = user.publicMetadata;
 
   try {
     const contact = await getContactById(zohoContactId);
@@ -585,7 +585,7 @@ export async function GET(request: Request): Promise<NextResponse> {
         state: contact.Mailing_State,
         zip: contact.Mailing_Zip,
       },
-      pricingTier: priceListId ? "Custom" : "Standard",
+      pricingTier: pricingPlanId ? "Custom" : "Standard",
     });
   } catch {
     return NextResponse.json({ error: "Account not found" }, { status: 404 });

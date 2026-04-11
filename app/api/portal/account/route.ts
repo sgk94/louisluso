@@ -22,7 +22,7 @@ export async function GET(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "Not a partner" }, { status: 403 });
   }
 
-  const { zohoContactId, priceListId } = user.publicMetadata;
+  const { zohoContactId, pricingPlanId } = user.publicMetadata;
 
   try {
     const contact = await getContactById(zohoContactId);
@@ -38,7 +38,7 @@ export async function GET(request: Request): Promise<NextResponse> {
         state: contact.Mailing_State,
         zip: contact.Mailing_Zip,
       },
-      pricingTier: priceListId ? "Custom" : "Standard",
+      pricingTier: pricingPlanId ? "Custom" : "Standard",
     });
   } catch {
     return NextResponse.json({ error: "Account not found" }, { status: 404 });

@@ -11,8 +11,8 @@ When a partner is logged in, the existing public catalog pages swap SRP for thei
 Three states based on user context:
 
 1. **Public visitor:** sees SRP (from SRP26 Price Book) — no change from current behavior
-2. **Partner without priceListId:** sees listing price (`item.rate` from Zoho Inventory)
-3. **Partner with priceListId:** sees listing price struck through + green pill with their bespoke price from their assigned Price Book
+2. **Partner without pricingPlanId:** sees listing price (`item.rate` from Zoho Inventory)
+3. **Partner with pricingPlanId:** sees listing price struck through + green pill with their bespoke price from their assigned Price Book
 
 ---
 
@@ -38,7 +38,7 @@ Reusable component that renders the correct price state:
 <PartnerPrice
   srp={227}           // always available
   listingPrice={76}   // always available
-  bespokePrice={68}   // only if partner has priceListId and item has a custom rate
+  bespokePrice={68}   // only if partner has pricingPlanId and item has a custom rate
   isPartner={true}    // from auth context
 />
 ```
@@ -63,7 +63,7 @@ Renders:
 
 1. Collection/product pages check if user is a partner via `currentUser()` from Clerk
 2. If partner → listing prices already available (adding `item.rate` to catalog data layer)
-3. If partner has `priceListId` → client fetches bespoke prices from `/api/portal/pricing`
+3. If partner has `pricingPlanId` → client fetches bespoke prices from `/api/portal/pricing`
 4. Components render conditionally based on pricing state
 
 ---
@@ -75,9 +75,9 @@ Renders:
 - **Auth:** requires Clerk session with partner role
 - **Query params:** `items` — comma-separated item IDs (e.g., `?items=123,456,789`)
 - **Logic:**
-  1. Read `priceListId` from Clerk metadata
-  2. If no `priceListId` → return `{ type: "listing" }`
-  3. If `priceListId` → fetch Price Book via `getPriceBook(priceListId)`
+  1. Read `pricingPlanId` from Clerk metadata
+  2. If no `pricingPlanId` → return `{ type: "listing" }`
+  3. If `pricingPlanId` → fetch Price Book via `getPriceBook(pricingPlanId)`
   4. Filter to requested item IDs
   5. Return `{ type: "bespoke", prices: { [itemId]: number } }`
 - **Rate limited** per IP
