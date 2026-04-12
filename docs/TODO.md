@@ -1,6 +1,6 @@
 # Louis Luso — Master Todo List
 
-> Last updated: 2026-04-09
+> Last updated: 2026-04-11
 
 ---
 
@@ -12,25 +12,17 @@
 - [ ] **Ken: Add 2026 new collections to Zoho** — SG4041-4048, LC9050-9055, LU3001-3005
 - [ ] **Ken: Define SRP pricing** for TANI, Manomos, Close Out, Accessories
 - [ ] **Ken: Verify Junior Series SKU prefix** in Zoho (assumed `JN-`)
-- [ ] **Scan all business cards into Zoho CRM** — Shawn (update card scan flow to push leads to Zoho CRM via `createLead()` instead of just Google Sheets)
+- [x] **Scan all business cards into Zoho CRM** — DONE (Regional CRM system built: card scan → Zoho CRM + Sheet + knowledge base, 8 Canadian contacts processed, Google Drive integration for batch scanning)
 
 ---
 
 ## HIGH — This Month
 
-### Website Phase 2: Public Catalog (Shawn)
-- [ ] SKU parsers — color + dimension extraction from Zoho data
-- [ ] Catalog type definitions
-- [ ] Collection config & matching logic (21 collections)
-- [ ] Zoho Inventory API — fix pricebooks endpoint, add getPriceBook()
-- [ ] Image helper + placeholder SVG
-- [ ] Catalog data layer — fetch, merge SRP, filter, shape for UI
-- [ ] Category pages — `/eyeglasses`, `/sunglasses`
-- [ ] Collection grid pages — `/eyeglasses/[collection]`, `/sunglasses/[collection]`
-- [ ] Product detail pages — `/products/[slug]`
-- [ ] Accessories page — `/accessories`
-- [ ] SRP26 price book setup script (dry-run first)
-- [ ] Full test suite passing + Next.js build clean
+### Website Phase 2: Public Catalog — COMPLETE
+### Website Phase 3: Static Pages — COMPLETE
+### Website Phase 4: Dealer Locator — COMPLETE (frontend; backend Zoho CRM integration deferred)
+### Website Phase 5a: Portal Foundation — COMPLETE
+### Website Phase 5b: Partner Pricing — COMPLETE
 
 ### Product Data (Ken)
 - [ ] Provide T-series color code reference chart (C1=?, C2=?, etc.)
@@ -47,15 +39,13 @@
 
 ## MEDIUM — Next 2 Months
 
-### Website Phase 3: Static Pages (Shawn)
-- [ ] Homepage design + build
-- [ ] About page
-- [ ] Contact page
-- [ ] "Become a Partner" form
-- [ ] Navigation + footer components
+### Website Phase 5c: Cart/Quote (Shawn) — NEXT
+- [ ] Add to Quote button on product detail
+- [ ] Cart state management
+- [ ] Quote builder UI
+- [ ] Zoho Sales Order creation
 
 ### Infrastructure
-- [ ] Product image migration — WooCommerce to Cloudinary (audit, pull, bulk upload)
 - [ ] Connect Stripe to Zoho Books — Ken
 - [ ] Set up GA4 property — Shawn/Ken
 
@@ -63,17 +53,10 @@
 
 ## LOW — Before Launch (by Sep 2026)
 
-### Website Phase 4: Dealer Locator (Shawn)
-- [ ] Mapbox integration
-- [ ] Dealer search by zip/city
-- [ ] "Contact This Dealer" email flow
-
-### Website Phase 5: B2B Portal (Shawn)
-- [ ] Wholesale catalog with bespoke pricing
-- [ ] Cart + quote/order flow
+### Website Phase 5d: Orders/Favorites (Shawn)
 - [ ] Order history
-- [ ] Favorites
-- [ ] Account settings
+- [ ] Invoice viewing
+- [ ] Favorites / reorder
 
 ### Website Phase 6: Polish & Launch (Shawn + Ken)
 - [ ] GA4 fully configured

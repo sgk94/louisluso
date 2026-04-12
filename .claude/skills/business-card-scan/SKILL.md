@@ -40,7 +40,10 @@ Map extracted text to these fields:
 | Address | Full street address |
 | State | Two-letter state abbreviation (e.g., CA, TX) — parse from address or city line |
 | City | City name — parse from address or city line |
-| Zip | ZIP code — parse from address. If only city+state available, check knowledge base |
+| Zip | ZIP code or postal code — parse from address. If only city+state available, check knowledge base |
+| Country | "US" or "CA" — auto-detected from state/province or zip format, but include in JSON if obvious from the card |
+
+**Country auto-detection:** The script auto-detects country from province (BC, ON = Canada) or zip format (V6X = Canada, 90001 = US). You can include `"country": "CA"` or `"country": "US"` in the JSON to be explicit, but it's optional.
 
 **Location enrichment:** If the card has city + state but no zip code, check the knowledge base by running:
 ```bash
@@ -67,6 +70,7 @@ State:    TX
 City:     Dallas
 Zip:      75201
 Region:   dallas (auto-assigned)
+Country:  US (auto-detected)
 Tags:     business-card; vision-expo-2026
 Source:   business-card
 Notes:    Fax: 555-0199

@@ -28,6 +28,7 @@ export interface CRMLeadInput {
   City: string;
   State: string;
   Zip_Code: string;
+  Country?: string;
   Region?: string;
   Lead_Source?: string;
   Description?: string;

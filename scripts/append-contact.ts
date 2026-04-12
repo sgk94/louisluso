@@ -1,10 +1,11 @@
-import "dotenv/config";
+import { config } from "dotenv";
+config({ path: ".env.local" });
 import { getSheetsClient } from "../email/gmail.js";
 import { createLead, type CRMLeadInput } from "../lib/zoho/crm.js";
 import { matchRegion, lookupCity, updateKnowledgeBase } from "../lib/crm/regions.js";
 
 const SHEET_ID = "1xWFgNlWI0GKnwPJ-btI9Yx9MaWaEwx42P-gQWnxQwpw";
-const SHEET_RANGE = "Sheet1!A:P";
+const SHEET_RANGE = "Sheet1!A:Q";
 
 interface CardContact {
   name: string;
@@ -22,6 +23,7 @@ interface CardContact {
   state: string;
   city: string;
   zip: string;
+  country: string;
 }
 
 function parseArgs(): CardContact {
@@ -47,11 +49,28 @@ function parseArgs(): CardContact {
     state: parsed.state ?? "",
     city: parsed.city ?? "",
     zip: parsed.zip ?? "",
+    country: parsed.country ?? "",
   };
 }
 
-function enrichLocation(contact: CardContact): { state: string; city: string; zip: string; region: string | null } {
-  let { state, city, zip } = contact;
+const CA_PROVINCES = new Set([
+  "AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT",
+]);
+
+function detectCountry(state: string, zip: string): string {
+  // Canadian postal codes: letter-number-letter pattern (e.g. V6X 3L7)
+  if (/^[A-Za-z]\d[A-Za-z]/.test(zip)) return "Canada";
+  // Canadian province abbreviation
+  if (CA_PROVINCES.has(state.toUpperCase().trim())) return "Canada";
+  // US zip codes: 5 digits
+  if (/^\d{5}/.test(zip)) return "United States";
+  // US state abbreviation (2 uppercase letters not in CA provinces)
+  if (/^[A-Z]{2}$/.test(state.toUpperCase().trim()) && !CA_PROVINCES.has(state.toUpperCase().trim())) return "United States";
+  return "";
+}
+
+function enrichLocation(contact: CardContact): { state: string; city: string; zip: string; region: string | null; country: string } {
+  let { state, city, zip, country } = contact;
 
   // If we have city + state but no zip, try the knowledge base
   if (city && state && !zip) {
@@ -62,10 +81,16 @@ function enrichLocation(contact: CardContact): { state: string; city: string; zi
     }
   }
 
+  // Auto-detect country if not provided
+  if (!country) {
+    country = detectCountry(state, zip);
+    if (country) console.log(`Country: auto-detected ${country}`);
+  }
+
   // Auto-assign region from zip
   const region = matchRegion(zip);
 
-  return { state, city, zip, region };
+  return { state, city, zip, region, country };
 }
 
 function splitName(name: string): { first: string; last: string } {
@@ -75,7 +100,7 @@ function splitName(name: string): { first: string; last: string } {
   return { first: parts[0], last: parts.slice(1).join(" ") };
 }
 
-async function writeToZohoCRM(contact: CardContact, location: { state: string; city: string; zip: string; region: string | null }): Promise<string> {
+async function writeToZohoCRM(contact: CardContact, location: { state: string; city: string; zip: string; region: string | null; country: string }): Promise<string> {
   const { first, last } = splitName(contact.name);
 
   const leadInput: CRMLeadInput = {
@@ -88,6 +113,7 @@ async function writeToZohoCRM(contact: CardContact, location: { state: string; c
     City: location.city,
     State: location.state,
     Zip_Code: location.zip,
+    Country: location.country || undefined,
     Region: location.region ?? undefined,
     Lead_Source: contact.source === "business-card" ? "Business Card" : contact.source,
     Description: [
@@ -103,7 +129,7 @@ async function writeToZohoCRM(contact: CardContact, location: { state: string; c
   return leadId;
 }
 
-async function appendToSheet(contact: CardContact, location: { state: string; city: string; zip: string; region: string | null }): Promise<void> {
+async function appendToSheet(contact: CardContact, location: { state: string; city: string; zip: string; region: string | null; country: string }): Promise<void> {
   const sheets = getSheetsClient();
   const row = [
     contact.name,
@@ -121,7 +147,8 @@ async function appendToSheet(contact: CardContact, location: { state: string; ci
     contact.phone,
     contact.website,
     contact.address,
-    location.region ?? "",  // Region (new column P)
+    location.region ?? "",  // Region (column P)
+    location.country,       // Country (column Q)
   ];
 
   await sheets.spreadsheets.values.append({

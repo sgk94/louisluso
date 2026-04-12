@@ -19,7 +19,7 @@ Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpower
 - **Newsletter:** Zoho Campaigns
 - **Email:** Gmail API (cs@louisluso.com)
 - **Fonts:** Cormorant Garamond (headings) + DM Sans (body) via next/font
-- **Testing:** Vitest, React Testing Library (196 tests)
+- **Testing:** Vitest, React Testing Library (227 tests)
 - **Package Manager:** pnpm
 
 ### Project Structure (new site files)
@@ -29,7 +29,8 @@ Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpower
 - `lib/zoho/client.ts` — Base HTTP client (auto-detects product, sets correct org header)
 - `lib/zoho/inventory.ts` — Zoho Inventory API (items, groups, price books)
 - `lib/zoho/books.ts` — Zoho Books API (sales orders, invoices)
-- `lib/zoho/crm.ts` — Zoho CRM API (leads, contacts, file attachments)
+- `lib/zoho/crm.ts` — Zoho CRM API (leads with Region/Country, contacts, searchLeads, file attachments)
+- `lib/crm/regions.ts` — Regional CRM: 5 metro regions (zip prefix matching), location knowledge base CRUD
 - `lib/catalog/collections.ts` — Static collection config (21 collections, SKU prefix/brand matching)
 - `lib/catalog/catalog.ts` — Catalog data layer (Zoho items + SRP26 pricing merge, React.cache wrapped)
 - `lib/catalog/sku-parser.ts` — Parse color names and dimensions from Zoho SKU text
@@ -238,7 +239,7 @@ JSONL append log for outreach performance analysis. Three event types:
 ### Email Core Modules
 - `email/env.ts` — Zod-validated env vars with conditional SMTP/Gmail validation
 - `email/send.ts` — Transport dispatch (smtp vs gmail), auto-logs to sent-log.jsonl on success
-- `email/gmail.ts` — Gmail API client: OAuth2 auth, send, reply detection, connection verify
+- `email/gmail.ts` — Gmail API client: OAuth2 auth, send, reply detection, connection verify, Google Drive access
 - `email/sequences.ts` — Sequence runner: enrollment, state machine, delay logic, reply detection, outcome logging
 - `email/templates.ts` — Template loading and rendering
 - `email/contacts.ts` — Contact directory (import, lookup, tag-based filtering)
@@ -263,6 +264,19 @@ JSONL append log for outreach performance analysis. Three event types:
 - `scripts/check-manage-stock.ts` — Check `manage_stock` status on products (diagnostic/audit). `npx tsx scripts/check-manage-stock.ts`
 - `scripts/list-remaining-variants.ts` — List remaining variants for a product (audit/debugging). `npx tsx scripts/list-remaining-variants.ts`
 - `scripts/restock-2026-03-09.ts` — Restock 19 variants with specific quantities (SG1011/12/13/15, LC9018). `npx tsx scripts/restock-2026-03-09.ts [--dry-run]`
+
+### CRM Scripts (`scripts/`)
+- `scripts/append-contact.ts` — Business card → Zoho CRM lead + Google Sheet + location knowledge base. Auto-detects country (US/CA), auto-assigns region from zip prefix. `npx tsx scripts/append-contact.ts '<JSON>'`
+- `scripts/crm-pull.ts` — Pull CRM leads by region/state/city into `email/contacts.json` for email sequences. `pnpm crm:pull -- --region socal`
+- `scripts/crm-pull-lib.ts` — Testable logic for CRM pull (buildCriteria, leadsToContacts)
+
+### Regional CRM System
+- **Source of truth:** Zoho CRM (leads with Region custom field)
+- **Regions:** Metro-area level (socal, norcal, dallas, austin, houston) — add-as-you-go in `lib/crm/regions.ts`
+- **Knowledge base:** `data/location-kb.json` (gitignored) — auto-grows as cards are scanned, maps city+state→zip+region
+- **Country detection:** Auto-detects US vs Canada from state/province abbreviation or zip/postal code format
+- **Google Drive:** OAuth2 scope enabled — can read/download/move files in Drive folders
+- **Workflow:** Scan card → CRM lead + Sheet + KB → later pull by region → enroll in email sequence
 
 ### Reference Files
 - `docs/stock-update-guide-2026-03-04.md` — Full audit: variant IDs, color codes, flags
