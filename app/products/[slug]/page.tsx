@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getProductBySlug, getAllProductSlugs } from "@/lib/catalog/catalog";
 import { VariantSelector } from "./VariantSelector";
+import { VariantQuoteTable } from "@/app/components/VariantQuoteTable";
 import { currentUser } from "@clerk/nextjs/server";
 import { isPartner } from "@/lib/portal/types";
 import { PartnerPrice } from "@/app/components/PartnerPrice";
@@ -62,10 +63,19 @@ export default async function ProductDetailPage({
       </nav>
 
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
-        <VariantSelector
-          variants={product.variants}
-          productName={product.name}
-        />
+        {partner ? (
+          <VariantQuoteTable
+            variants={product.variants}
+            productId={product.id}
+            productName={product.name}
+            price={product.listingPrice}
+          />
+        ) : (
+          <VariantSelector
+            variants={product.variants}
+            productName={product.name}
+          />
+        )}
 
         <div>
           <h1 className="text-2xl font-light uppercase tracking-widest">
