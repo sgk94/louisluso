@@ -81,9 +81,11 @@ export function MobileMenu({ eyeglassesCollections, sunglassesCollections, isPar
               <Link href="/accessories" onClick={() => setOpen(false)} className="block text-sm font-medium uppercase tracking-[1.5px] text-gray-700 hover:text-bronze">
                 Accessories
               </Link>
-              <Link href="/find-a-dealer" onClick={() => setOpen(false)} className="block text-sm font-medium uppercase tracking-[1.5px] text-gray-700 hover:text-bronze">
-                Find a Dealer
-              </Link>
+              {!isPartner && (
+                <Link href="/find-a-dealer" onClick={() => setOpen(false)} className="block text-sm font-medium uppercase tracking-[1.5px] text-gray-700 hover:text-bronze">
+                  Find a Dealer
+                </Link>
+              )}
 
               <div className="border-t border-gray-200 pt-4">
                 {!isPartner && (
@@ -104,6 +106,9 @@ export function MobileMenu({ eyeglassesCollections, sunglassesCollections, isPar
                   </Link>
                   <Link href="/portal/account" onClick={() => setOpen(false)} className="mt-2 block text-sm text-gray-500 hover:text-bronze">
                     Account
+                  </Link>
+                  <Link href="/portal/quote" onClick={() => setOpen(false)} className="mt-2 block text-sm text-gray-500 hover:text-bronze">
+                    View Quote
                   </Link>
                 </div>
               )}

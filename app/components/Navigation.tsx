@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { HeartIcon } from "@heroicons/react/24/outline";
 import { currentUser } from "@clerk/nextjs/server";
 import { getCollectionsByCategory } from "@/lib/catalog/collections";
 import { isPartner } from "@/lib/portal/types";
 import { MegaMenu } from "./MegaMenu";
 import { MobileMenu } from "./MobileMenu";
 import { UserMenu } from "./UserMenu";
+import { CartIcon } from "./CartIcon";
 
 export async function Navigation(): Promise<React.ReactElement> {
   const user = await currentUser();
@@ -43,10 +43,14 @@ export async function Navigation(): Promise<React.ReactElement> {
 
           {/* Right: utility links (desktop) */}
           <div className="hidden items-center gap-6 lg:flex">
-            <Link href="/find-a-dealer" className="text-xs font-medium uppercase tracking-[1.5px] text-gray-700 transition-colors hover:text-bronze">Find a Dealer</Link>
-            <Link href="/portal" aria-label="Favorites"><HeartIcon className="h-5 w-5 text-gray-500 transition-colors hover:text-bronze" /></Link>
+            {!partner && (
+              <Link href="/find-a-dealer" className="text-xs font-medium uppercase tracking-[1.5px] text-gray-700 transition-colors hover:text-bronze">Find a Dealer</Link>
+            )}
             {partner ? (
-              <UserMenu />
+              <>
+                <CartIcon />
+                <UserMenu />
+              </>
             ) : (
               <Link href="/portal" className="text-xs font-medium uppercase tracking-[1.5px] text-gray-700 transition-colors hover:text-bronze">Login</Link>
             )}
