@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
-import { loadCart, saveCart, addItems, updateQuantity, removeItem, clearCart, getTotalQuantity, getSubtotal, type CartItem } from "@/lib/portal/cart";
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from "react";
+import { loadCart, saveCart, addItems, updateQuantity, removeItem, clearCart, getTotalQuantity, getSubtotal, type CartItem, CART_KEY } from "@/lib/portal/cart";
 
 interface CartContextValue {
   items: CartItem[];
@@ -20,6 +20,11 @@ export function CartProvider({ children }: { children: ReactNode }): React.React
 
   useEffect(() => {
     setItems(loadCart());
+    const sync = (e: StorageEvent) => {
+      if (e.key === CART_KEY) setItems(loadCart());
+    };
+    window.addEventListener("storage", sync);
+    return () => window.removeEventListener("storage", sync);
   }, []);
 
   const add = useCallback((newItems: CartItem[]) => {
@@ -52,21 +57,20 @@ export function CartProvider({ children }: { children: ReactNode }): React.React
     saveCart(empty);
   }, []);
 
-  return (
-    <CartContext.Provider
-      value={{
-        items,
-        totalQuantity: getTotalQuantity(items),
-        subtotal: getSubtotal(items),
-        add,
-        update,
-        remove,
-        clear,
-      }}
-    >
-      {children}
-    </CartContext.Provider>
+  const value = useMemo(
+    () => ({
+      items,
+      totalQuantity: getTotalQuantity(items),
+      subtotal: getSubtotal(items),
+      add,
+      update,
+      remove,
+      clear,
+    }),
+    [items, add, update, remove, clear],
   );
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
 export function useCart(): CartContextValue {

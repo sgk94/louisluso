@@ -1,4 +1,6 @@
-const CART_KEY = "louisluso-cart";
+import { z } from "zod";
+
+export const CART_KEY = "louisluso-cart";
 
 export interface CartItem {
   itemId: string;
@@ -9,13 +11,26 @@ export interface CartItem {
   price: number;
 }
 
+const cartItemSchema = z.object({
+  itemId: z.string(),
+  productId: z.string(),
+  productName: z.string(),
+  colorName: z.string(),
+  quantity: z.number().int().min(1),
+  price: z.number().min(0),
+});
+
 export function loadCart(): CartItem[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(CART_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((item: unknown) => cartItemSchema.safeParse(item))
+      .filter((r): r is z.SafeParseSuccess<CartItem> => r.success)
+      .map((r) => r.data);
   } catch {
     return [];
   }

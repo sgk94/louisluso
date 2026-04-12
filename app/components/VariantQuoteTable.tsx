@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { CatalogVariant } from "@/lib/catalog/types";
 import { useCart } from "./CartProvider";
 import { formatPrice } from "@/lib/catalog/format";
@@ -22,6 +22,13 @@ export function VariantQuoteTable({
   const { add } = useCart();
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [added, setAdded] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   function setQty(variantId: string, qty: number): void {
     setQuantities((prev) => ({ ...prev, [variantId]: Math.max(0, qty) }));
@@ -48,7 +55,8 @@ export function VariantQuoteTable({
       add(items);
       setQuantities({});
       setAdded(true);
-      setTimeout(() => setAdded(false), 2000);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => setAdded(false), 2000);
     }
   }
 
