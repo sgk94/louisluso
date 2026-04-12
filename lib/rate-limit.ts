@@ -37,3 +37,16 @@ export async function rateLimitDealerContact(
   const { success, remaining } = await dealerContactLimiter.limit(identifier);
   return { success, remaining };
 }
+
+const quoteLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(5, "60 s"),
+  prefix: "louisluso:quote",
+});
+
+export async function rateLimitQuote(
+  identifier: string
+): Promise<RateLimitResult> {
+  const { success, remaining } = await quoteLimiter.limit(identifier);
+  return { success, remaining };
+}
