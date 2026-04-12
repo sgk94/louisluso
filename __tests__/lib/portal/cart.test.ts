@@ -105,4 +105,28 @@ describe("cart state", () => {
   it("getSubtotal calculates price * quantity sum", () => {
     expect(getSubtotal([item1, item2])).toBe(5 * 76 + 10 * 76);
   });
+
+  it("loadCart filters out invalid items from localStorage", () => {
+    const mixed = [
+      { itemId: "v1", productId: "g1", productName: "SG", colorName: "Black", quantity: 5, price: 76 },
+      { itemId: "v2", quantity: "not-a-number", price: 76 }, // invalid: missing fields, wrong type
+      { broken: true }, // completely invalid
+    ];
+    mockStorage["louisluso-cart"] = JSON.stringify(mixed);
+    const cart = loadCart();
+    expect(cart).toHaveLength(1);
+    expect(cart[0].itemId).toBe("v1");
+  });
+
+  it("loadCart returns empty for non-array JSON", () => {
+    mockStorage["louisluso-cart"] = JSON.stringify({ not: "array" });
+    const cart = loadCart();
+    expect(cart).toEqual([]);
+  });
+
+  it("loadCart returns empty for corrupt JSON", () => {
+    mockStorage["louisluso-cart"] = "not valid json{{{";
+    const cart = loadCart();
+    expect(cart).toEqual([]);
+  });
 });
