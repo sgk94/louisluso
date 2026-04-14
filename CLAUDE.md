@@ -19,7 +19,7 @@ Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpower
 - **Newsletter:** Zoho Campaigns
 - **Email:** Gmail API (cs@louisluso.com)
 - **Fonts:** Cormorant Garamond (headings) + DM Sans (body) via next/font
-- **Testing:** Vitest, React Testing Library (227 tests)
+- **Testing:** Vitest, React Testing Library (287 tests)
 - **Package Manager:** pnpm
 
 ### Project Structure (new site files)
@@ -266,17 +266,18 @@ JSONL append log for outreach performance analysis. Three event types:
 - `scripts/restock-2026-03-09.ts` — Restock 19 variants with specific quantities (SG1011/12/13/15, LC9018). `npx tsx scripts/restock-2026-03-09.ts [--dry-run]`
 
 ### CRM Scripts (`scripts/`)
-- `scripts/append-contact.ts` — Business card → Zoho CRM lead + Google Sheet + location knowledge base. Auto-detects country (US/CA), auto-assigns region from zip prefix. `npx tsx scripts/append-contact.ts '<JSON>'`
+- `scripts/append-contact.ts` — Business card → Zoho CRM lead + Google Sheet + location knowledge base. Auto-detects country (US/CA), auto-assigns region from zip prefix. Single: `npx tsx scripts/append-contact.ts '<JSON>'` | Batch: `npx tsx scripts/append-contact.ts --batch <file.json> [--resume]` (2s delay, checkpoint file, atomic KB writes, split CRM/Sheet error handling)
 - `scripts/crm-pull.ts` — Pull CRM leads by region/state/city into `email/contacts.json` for email sequences. `pnpm crm:pull -- --region socal`
 - `scripts/crm-pull-lib.ts` — Testable logic for CRM pull (buildCriteria, leadsToContacts)
 
 ### Regional CRM System
 - **Source of truth:** Zoho CRM (leads with Region custom field)
-- **Regions:** Metro-area level (socal, norcal, dallas, austin, houston) — add-as-you-go in `lib/crm/regions.ts`
-- **Knowledge base:** `data/location-kb.json` (gitignored) — auto-grows as cards are scanned, maps city+state→zip+region
+- **Regions:** Metro-area level (socal, norcal, dallas, austin, houston, lasvegas) — add-as-you-go in `lib/crm/regions.ts`
+- **Knowledge base:** `data/location-kb.json` (gitignored) — auto-grows as cards are scanned, maps city+state→zip+region. Atomic writes (temp+rename), skip-if-exists (preserves first-seen zip)
 - **Country detection:** Auto-detects US vs Canada from state/province abbreviation or zip/postal code format
 - **Google Drive:** OAuth2 scope enabled — can read/download/move files in Drive folders
 - **Workflow:** Scan card → CRM lead + Sheet + KB → later pull by region → enroll in email sequence
+- **Gotchas:** Zoho rate-limits token refresh after ~10 rapid calls (use batch mode). Sheet uses `RAW` valueInputOption to prevent formula injection. CRM and Sheet writes have separate error handling (Sheet failure won't mask CRM success). `searchLeads` paginates automatically. `buildCriteria` validates/sanitizes inputs against injection.
 
 ### Reference Files
 - `docs/stock-update-guide-2026-03-04.md` — Full audit: variant IDs, color codes, flags

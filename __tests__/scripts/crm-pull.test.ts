@@ -26,6 +26,26 @@ describe("buildCriteria", () => {
   it("throws when no filter provided", () => {
     expect(() => buildCriteria({})).toThrow("Provide --region, --state, or --city");
   });
+
+  it("rejects region with injection characters", () => {
+    expect(() => buildCriteria({ region: "socal)or(Email:starts_with:" })).toThrow("Invalid region slug");
+  });
+
+  it("rejects state with more than 2 letters", () => {
+    expect(() => buildCriteria({ state: "TXX" })).toThrow("Invalid state");
+  });
+
+  it("rejects state with numbers", () => {
+    expect(() => buildCriteria({ state: "T1" })).toThrow("Invalid state");
+  });
+
+  it("sanitizes city by stripping parens and colons", () => {
+    expect(buildCriteria({ city: "Las Vegas" })).toBe("(City:equals:Las Vegas)");
+  });
+
+  it("rejects empty city after sanitization", () => {
+    expect(() => buildCriteria({ city: "():" })).toThrow("City cannot be empty");
+  });
 });
 
 describe("leadsToContacts", () => {
@@ -74,6 +94,22 @@ describe("leadsToContacts", () => {
         First_Name: "Bob",
         Last_Name: "X",
         Email: "",
+        Phone: "555-0000",
+      },
+    ];
+
+    const contacts = leadsToContacts(leads);
+    expect(contacts).toHaveLength(0);
+  });
+
+  it("skips leads with null email", () => {
+    const leads = [
+      {
+        id: "lead-4",
+        Company: "Null Email Co",
+        First_Name: "Sam",
+        Last_Name: "N",
+        Email: null,
         Phone: "555-0000",
       },
     ];

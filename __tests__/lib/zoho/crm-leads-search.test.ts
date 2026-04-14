@@ -50,7 +50,7 @@ describe("searchLeads", () => {
     expect(leads).toHaveLength(1);
     expect(leads[0].Email).toBe("jane@laoptical.com");
     expect(mockZohoFetch).toHaveBeenCalledWith("/crm/v6/Leads/search", {
-      params: { criteria: "(Region:equals:socal)", per_page: "200" },
+      params: { criteria: "(Region:equals:socal)", per_page: "200", page: "1" },
     });
   });
 
@@ -109,5 +109,30 @@ describe("searchLeads", () => {
     const leads = await searchLeads("(Region:equals:nowhere)");
 
     expect(leads).toEqual([]);
+  });
+
+  it("paginates when more_records is true", async () => {
+    mockZohoFetch
+      .mockResolvedValueOnce({
+        data: [{ id: "lead-p1", Company: "Page1 Co", First_Name: "A", Last_Name: "B", Email: "a@b.com", Phone: "555" }],
+        info: { more_records: true },
+      })
+      .mockResolvedValueOnce({
+        data: [{ id: "lead-p2", Company: "Page2 Co", First_Name: "C", Last_Name: "D", Email: "c@d.com", Phone: "555" }],
+        info: { more_records: false },
+      });
+
+    const leads = await searchLeads("(Region:equals:socal)");
+
+    expect(leads).toHaveLength(2);
+    expect(leads[0].id).toBe("lead-p1");
+    expect(leads[1].id).toBe("lead-p2");
+    expect(mockZohoFetch).toHaveBeenCalledTimes(2);
+    expect(mockZohoFetch).toHaveBeenNthCalledWith(1, "/crm/v6/Leads/search", {
+      params: { criteria: "(Region:equals:socal)", per_page: "200", page: "1" },
+    });
+    expect(mockZohoFetch).toHaveBeenNthCalledWith(2, "/crm/v6/Leads/search", {
+      params: { criteria: "(Region:equals:socal)", per_page: "200", page: "2" },
+    });
   });
 });

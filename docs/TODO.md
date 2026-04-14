@@ -1,6 +1,6 @@
 # Louis Luso — Master Todo List
 
-> Last updated: 2026-04-11
+> Last updated: 2026-04-13
 
 ---
 
@@ -12,7 +12,7 @@
 - [ ] **Ken: Add 2026 new collections to Zoho** — SG4041-4048, LC9050-9055, LU3001-3005
 - [ ] **Ken: Define SRP pricing** for TANI, Manomos, Close Out, Accessories
 - [ ] **Ken: Verify Junior Series SKU prefix** in Zoho (assumed `JN-`)
-- [x] **Scan all business cards into Zoho CRM** — DONE (Regional CRM system built: card scan → Zoho CRM + Sheet + knowledge base, 8 Canadian contacts processed, Google Drive integration for batch scanning)
+- [x] **Scan all business cards into Zoho CRM** — DONE (Regional CRM system built: card scan → Zoho CRM + Sheet + knowledge base, 28 leads processed (8 CA, 14 TX, 6 NV), batch mode, Google Drive integration)
 
 ---
 

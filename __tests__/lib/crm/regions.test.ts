@@ -42,6 +42,22 @@ describe("matchRegion", () => {
     expect(matchRegion("78701")).toBe("austin");
   });
 
+  it("matches Las Vegas zip 89101", () => {
+    expect(matchRegion("89101")).toBe("lasvegas");
+  });
+
+  it("matches Las Vegas zip 89148", () => {
+    expect(matchRegion("89148")).toBe("lasvegas");
+  });
+
+  it("does NOT match Reno zip 89501 (prefix 895, outside 891)", () => {
+    expect(matchRegion("89501")).toBeNull();
+  });
+
+  it("does NOT match Reno zip 88901 (prefix 889, outside 891)", () => {
+    expect(matchRegion("88901")).toBeNull();
+  });
+
   it("returns null for zip with no matching region", () => {
     expect(matchRegion("99999")).toBeNull();
   });
@@ -95,12 +111,13 @@ describe("knowledge base", () => {
     });
   });
 
-  it("updateKnowledgeBase overwrites existing entry", () => {
+  it("updateKnowledgeBase does not overwrite existing entry", () => {
     updateKnowledgeBase("Austin", "TX", "78701", null);
-    updateKnowledgeBase("Austin", "TX", "78701", "austin");
+    updateKnowledgeBase("Austin", "TX", "78702", "austin");
 
     const entry = lookupCity("Austin", "TX");
-    expect(entry?.region).toBe("austin");
+    expect(entry?.zip).toBe("78701");
+    expect(entry?.region).toBeNull();
   });
 
   it("loadKnowledgeBase returns all entries", () => {

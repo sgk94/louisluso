@@ -22,9 +22,9 @@ export interface CRMLeadInput {
   Company: string;
   First_Name: string;
   Last_Name: string;
-  Email: string;
-  Phone: string;
-  Street: string;
+  Email?: string;
+  Phone?: string;
+  Street?: string;
   City: string;
   State: string;
   Zip_Code: string;
@@ -39,8 +39,8 @@ export interface CRMLead {
   Company: string;
   First_Name: string;
   Last_Name: string;
-  Email: string;
-  Phone: string;
+  Email: string | null;
+  Phone: string | null;
   Street?: string;
   City?: string;
   State?: string;
@@ -159,11 +159,22 @@ export async function getContactByEmail(
 }
 
 export async function searchLeads(criteria: string): Promise<CRMLead[]> {
-  const response = await zohoFetch<SearchLeadsResponse>("/crm/v6/Leads/search", {
-    params: { criteria, per_page: "200" },
-  });
+  const allLeads: CRMLead[] = [];
+  let page = 1;
+  let hasMore = true;
 
-  return response.data ?? [];
+  while (hasMore) {
+    const response = await zohoFetch<SearchLeadsResponse>("/crm/v6/Leads/search", {
+      params: { criteria, per_page: "200", page: String(page) },
+    });
+
+    const leads = response.data ?? [];
+    allLeads.push(...leads);
+    hasMore = response.info?.more_records ?? false;
+    page++;
+  }
+
+  return allLeads;
 }
 
 export async function attachFileToLead(

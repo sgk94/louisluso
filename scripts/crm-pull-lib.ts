@@ -7,10 +7,26 @@ export interface PullFilter {
   city?: string;
 }
 
+function sanitize(value: string): string {
+  return value.replace(/[()":]/g, "").trim();
+}
+
 export function buildCriteria(filter: PullFilter): string {
-  if (filter.region) return `(Region:equals:${filter.region})`;
-  if (filter.state) return `(State:equals:${filter.state})`;
-  if (filter.city) return `(City:equals:${filter.city})`;
+  if (filter.region) {
+    const val = sanitize(filter.region);
+    if (!/^[a-z0-9-]+$/.test(val)) throw new Error(`Invalid region slug: ${val}`);
+    return `(Region:equals:${val})`;
+  }
+  if (filter.state) {
+    const val = sanitize(filter.state).toUpperCase();
+    if (!/^[A-Z]{2}$/.test(val)) throw new Error(`Invalid state: ${val}`);
+    return `(State:equals:${val})`;
+  }
+  if (filter.city) {
+    const val = sanitize(filter.city);
+    if (!val) throw new Error("City cannot be empty");
+    return `(City:equals:${val})`;
+  }
   throw new Error("Provide --region, --state, or --city");
 }
 
@@ -26,7 +42,7 @@ export function leadsToContacts(leads: CRMLead[]): Contact[] {
       const locationParts = [lead.City, lead.State].filter(Boolean);
 
       return {
-        email: String(lead.Email).toLowerCase().trim(),
+        email: (lead.Email ?? "").toLowerCase().trim(),
         name: `${lead.First_Name ?? ""} ${lead.Last_Name ?? ""}`.trim(),
         company: String(lead.Company ?? ""),
         type: "",

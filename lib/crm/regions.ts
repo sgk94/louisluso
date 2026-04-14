@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, existsSync } from "fs";
+import { readFileSync, writeFileSync, renameSync, existsSync } from "fs";
 import { join } from "path";
 
 export interface Region {
@@ -13,6 +13,7 @@ export const REGIONS: Region[] = [
   { slug: "dallas", name: "Dallas / Fort Worth", zipPrefixes: ["750-753", "760-761"] },
   { slug: "austin", name: "Austin", zipPrefixes: ["786-787"] },
   { slug: "houston", name: "Houston", zipPrefixes: ["770-775"] },
+  { slug: "lasvegas", name: "Las Vegas", zipPrefixes: ["891"] },
 ];
 
 export function matchRegion(zip: string | undefined): string | null {
@@ -54,7 +55,8 @@ export function loadKnowledgeBase(): Record<string, KnowledgeBaseEntry> {
   if (!existsSync(KB_PATH)) return {};
   try {
     return JSON.parse(readFileSync(KB_PATH, "utf-8")) as Record<string, KnowledgeBaseEntry>;
-  } catch {
+  } catch (err) {
+    console.warn(`Warning: location-kb.json is corrupt or unreadable, starting fresh. Error: ${err instanceof Error ? err.message : err}`);
     return {};
   }
 }
@@ -74,6 +76,9 @@ export function updateKnowledgeBase(
   const kb = loadKnowledgeBase();
   const key = `${city.toLowerCase().trim()}, ${state.toLowerCase().trim()}`;
 
+  // Only write if key is absent — don't overwrite existing entries (Fix 4: multi-zip safety)
+  if (kb[key]) return;
+
   kb[key] = {
     state: state.toUpperCase().trim(),
     city: city.trim(),
@@ -81,5 +86,8 @@ export function updateKnowledgeBase(
     region,
   };
 
-  writeFileSync(KB_PATH, JSON.stringify(kb, null, 2) + "\n");
+  // Atomic write: write to temp file then rename (Fix 1)
+  const tmpPath = KB_PATH + ".tmp";
+  writeFileSync(tmpPath, JSON.stringify(kb, null, 2) + "\n");
+  renameSync(tmpPath, KB_PATH);
 }

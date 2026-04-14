@@ -120,7 +120,23 @@ The script will:
 
 ## Batch mode
 
-If the user provides multiple card images at once, process them one at a time — extract, show for review, wait for confirmation, then move to the next. Don't batch-confirm because the user might want to correct individual cards.
+If the user provides multiple card images at once (e.g. a Drive folder):
+
+1. Read all images and extract contact data
+2. Show the full list for review (all contacts in one summary table)
+3. After user confirms, write all contacts to a temp JSON array file
+4. Run batch command instead of individual calls:
+
+```bash
+npx tsx scripts/append-contact.ts --batch /tmp/cards-batch.json
+```
+
+The batch command processes all contacts in one process invocation with a 2-second delay between each, avoiding Zoho API rate limiting. **Never run individual append-contact calls back-to-back** — Zoho throttles token refreshes after ~10 rapid calls.
+
+For single cards (one at a time), the individual command is fine:
+```bash
+npx tsx scripts/append-contact.ts '<JSON>'
+```
 
 ## Edge cases
 
