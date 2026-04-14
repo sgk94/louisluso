@@ -1,6 +1,6 @@
 # Louis Luso — Master Todo List
 
-> Last updated: 2026-04-13
+> Last updated: 2026-04-14
 
 ---
 
@@ -23,6 +23,7 @@
 ### Website Phase 4: Dealer Locator — COMPLETE (frontend; backend Zoho CRM integration deferred)
 ### Website Phase 5a: Portal Foundation — COMPLETE
 ### Website Phase 5b: Partner Pricing — COMPLETE
+### Website Phase 5c: Cart/Quote — COMPLETE
 
 ### Product Data (Ken)
 - [ ] Provide T-series color code reference chart (C1=?, C2=?, etc.)
@@ -39,11 +40,10 @@
 
 ## MEDIUM — Next 2 Months
 
-### Website Phase 5c: Cart/Quote (Shawn) — NEXT
-- [ ] Add to Quote button on product detail
-- [ ] Cart state management
-- [ ] Quote builder UI
-- [ ] Zoho Sales Order creation
+### Website Phase 5d: Orders/Favorites (Shawn) — NEXT
+- [ ] Order history from Zoho Books
+- [ ] Invoice viewing
+- [ ] Favorites / one-click reorder
 
 ### Infrastructure
 - [ ] Connect Stripe to Zoho Books — Ken
@@ -52,11 +52,6 @@
 ---
 
 ## LOW — Before Launch (by Sep 2026)
-
-### Website Phase 5d: Orders/Favorites (Shawn)
-- [ ] Order history
-- [ ] Invoice viewing
-- [ ] Favorites / reorder
 
 ### Website Phase 6: Polish & Launch (Shawn + Ken)
 - [ ] GA4 fully configured

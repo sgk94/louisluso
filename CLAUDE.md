@@ -3,7 +3,7 @@
 ## About
 E-commerce eyewear retailer (B2B wholesale to optical stores + B2C catalog). Domain registered through Bluehost, hosted on AWS (being migrated to Vercel).
 
-## New Website (in progress — Phase 5b complete)
+## New Website (in progress — Phase 5c complete)
 Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpowers/specs/2026-04-08-louisluso-website-redesign.md` for full spec.
 
 ### Stack
@@ -48,8 +48,14 @@ Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpower
 - `lib/dealers/mock-data.ts` — 10 mock dealers (Chicago area, to be replaced with Zoho CRM)
 - `lib/dealers/distance.ts` — Haversine distance calculation + sort/filter by radius
 - `lib/portal/types.ts` — PartnerMetadata Zod schema + `isPartner()` type guard
+- `lib/portal/cart.ts` — Cart state (localStorage + multi-tab sync, React context via `CartProvider`)
+- `lib/schemas/quote.ts` — Quote submission Zod schema
 - `app/components/PartnerPrice.tsx` — Price display (SRP / listing / strikethrough+pill for bespoke)
 - `app/components/UserMenu.tsx` — Partner dropdown menu in nav
+- `app/components/CartProvider.tsx` — Cart context provider (partners only)
+- `app/components/CartIcon.tsx` — Shopping bag with bronze count badge in nav
+- `app/components/VariantQuoteTable.tsx` — Per-variant quantity table on product detail (partners)
+- `app/portal/quote/page.tsx` — Quote review/edit + submit to Zoho Books Estimate
 - `proxy.ts` — Clerk middleware (protects /portal routes)
 - `__tests__/` — Vitest test files
 - `.env.local` — Local environment variables (gitignored)
@@ -69,8 +75,8 @@ Three-tier pricing from Zoho Inventory:
 5. **B2B Portal**
    - **5a Portal Foundation** — COMPLETE (auto-matching via Zoho CRM, dashboard, account page, UserMenu, invite script)
    - **5b Partner Pricing** — COMPLETE (listing price in catalog, PartnerPrice component, pricing API, "Find a Dealer" hidden for partners)
-   - **5c Cart/Quote** — next (Add to Quote button, cart state, quote builder, Zoho Sales Order creation)
-   - **5d Orders/Favorites** — order history, invoices, favorites, reorder
+   - **5c Cart/Quote** — COMPLETE (cart state w/ localStorage + multi-tab sync, VariantQuoteTable, /portal/quote page, POST /api/portal/quote → Zoho Books Estimate + Gmail confirmation, server-side pricing, rate limits)
+   - **5d Orders/Favorites** — next (order history, invoices, favorites, reorder)
 6. **Polish & Launch** — GA4, image migration, DNS cutover, WordPress retirement
 
 ## Current Platform (WordPress — being replaced)
