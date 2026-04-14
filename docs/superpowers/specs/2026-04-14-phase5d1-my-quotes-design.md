@@ -64,7 +64,15 @@ export async function getEstimatesForContact(
 
 Calls `GET /books/v3/estimates?customer_id={id}&sort_column=date&sort_order=D`. Returns newest-first. Zoho caps at 200 per response — acceptable ceiling for MVP.
 
-**Draft filter:** `draft` estimates are filtered out of the returned array. Partners auto-send on submission (5c), so a draft in their list would only be Ken's WIP — not something the partner should see.
+**On Zoho "draft" vs "sent":**
+
+Zoho distinguishes `draft` (created but not sent) from `sent` (estimate email has been dispatched from Zoho). These are internal Zoho lifecycle states and do not match the partner's mental model.
+
+In our 5c flow, `POST /api/portal/quote` calls `createEstimate` without `send=true`, so **every partner-submitted quote lands in Zoho as `draft`**. It only transitions to `sent` when Ken (or a Zoho workflow) sends the estimate email. From the partner's perspective, both states mean the same thing: *"I submitted this, Ken hasn't confirmed stock yet."*
+
+**Decision:** treat `draft` and `sent` as the same partner-facing state. Both map to the label **"Pending Review"**. No filter — both are returned in the list.
+
+Ken's own WIP drafts (created manually in Zoho before a partner exists, or for a different customer) are scoped out naturally by the `customer_id` query param. If Ken drafts a hypothetical quote directly under a partner's contact, the partner will see it — that is the expected, acceptable behavior, since Ken is not expected to create speculative drafts under partner contacts.
 
 **Response validation:** parses the Zoho response through a Zod schema at runtime (the `estimates` array + each item's required fields). On parse failure, throws an error that the page layer maps to the generic error state. This adds minor runtime cost but prevents malformed data from reaching the UI; matches the safety bar appropriate for partner-facing server code.
 
@@ -79,12 +87,12 @@ export function partnerLabelForEstimateStatus(
 Returns:
 | Zoho status | Partner label |
 |---|---|
-| `sent` | "Pending Review" |
+| `draft` | "Pending Review" *(partner-submitted; awaiting Ken's review in Zoho)* |
+| `sent` | "Pending Review" *(Ken has dispatched the estimate email; partner still waiting on confirmation)* |
 | `accepted` | "Confirmed" |
 | `declined` | "Declined" |
 | `expired` | "Expired" |
 | `invoiced` | "Order Placed" |
-| `draft` | "Draft" |
 | anything else | the raw status string, title-cased as fallback |
 
 ---
@@ -118,7 +126,8 @@ Dark theme matching the rest of the portal (`bg-[#0a0a0a]`, bronze accents).
 | Order Placed | `bg-green-500/15 text-green-400` |
 | Declined | `bg-red-500/10 text-red-400` |
 | Expired | `bg-white/5 text-gray-500` |
-| Draft | `bg-white/5 text-gray-500` |
+
+(Partners never see a "Draft" pill — `draft` is mapped to "Pending Review" per the status table above.)
 
 ### Rows
 
@@ -246,11 +255,11 @@ No new dependencies.
 
 **`__tests__/lib/zoho/books-estimates-list.test.ts`:**
 - `getEstimatesForContact` calls `zohoFetch` with the correct URL + params (`customer_id`, `sort_column=date`, `sort_order=D`)
-- Returns the `estimates` array from the response
-- Filters out `draft` status from the returned array
+- Returns the `estimates` array from the response (including `draft` rows — no filter)
 - Throws when Zoho returns malformed data (Zod parse failure)
 - Propagates Zoho errors (doesn't swallow)
 - `partnerLabelForEstimateStatus` maps each of the 6 known statuses correctly
+- `partnerLabelForEstimateStatus` returns "Pending Review" for both `draft` and `sent`
 - `partnerLabelForEstimateStatus` returns title-cased fallback for unknown status
 
 ### Component Tests
