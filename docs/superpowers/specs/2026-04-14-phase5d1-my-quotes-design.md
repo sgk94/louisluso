@@ -11,19 +11,19 @@ Closes the loop on 5c: after a partner submits a quote, they can come back and s
 ## Scope
 
 **In scope:**
-- `/portal/quotes` — list page showing all of a partner's submitted estimates
+- `/portal/quotes` — list page showing a partner's submitted estimates
 - Columns: Quote # · Date · Status · Total
 - Status labels translated to partner-friendly copy
 - Dashboard card + UserMenu item for navigation
 - Empty state
 - Error state
+- Pagination (20/page, Prev/Next)
 
 **Not in scope (later chunks):**
 - Quote/order detail page (5d.2)
 - Invoice list + pay links (5d.3)
 - Favorites (5d.4)
 - Reorder (5d.5)
-- Pagination (deferred — plan documented below)
 - Caching (deferred — plan documented below)
 
 ---
@@ -32,14 +32,15 @@ Closes the loop on 5c: after a partner submits a quote, they can come back and s
 
 **Page:** `/portal/quotes` — Server Component, SSR, no client JS.
 
-**Auth flow:**
+**Auth + request flow:**
 1. `currentUser()` from Clerk. If null → redirect `/sign-in`.
 2. `isPartner(user.publicMetadata)` — if false → redirect `/pending-approval`.
 3. Read `zohoContactId` from `user.publicMetadata`. If missing → render error state "Account setup incomplete, contact support." (invariant from 5a, defensive).
-4. Fetch estimates via `getEstimatesForContact(zohoContactId)`.
-5. Render table (or empty state if none).
+4. Read `searchParams.page` → parse to a positive integer; default `1`; clamp invalid values back to `1`.
+5. Fetch page via `getEstimatesForContact(zohoContactId, { page, perPage: 20 })`.
+6. Render table + Prev/Next controls (or empty state if first page is empty).
 
-**Data flow:** Clerk session → `zohoContactId` → Zoho Books API → sorted array → server-rendered table.
+**Data flow:** Clerk session → `zohoContactId` + page → Zoho Books API → `{ estimates, hasMore, page }` → server-rendered table + nav.
 
 ---
 
@@ -57,12 +58,24 @@ export interface ZohoEstimateListItem {
   currency_code: string;
 }
 
+export interface EstimateListOptions {
+  page?: number;          // 1-indexed, default 1
+  perPage?: number;       // default 20, max 200 (Zoho cap)
+}
+
+export interface EstimateListResult {
+  estimates: ZohoEstimateListItem[];
+  page: number;
+  hasMore: boolean;
+}
+
 export async function getEstimatesForContact(
   customerId: string,
-): Promise<ZohoEstimateListItem[]>
+  options?: EstimateListOptions,
+): Promise<EstimateListResult>
 ```
 
-Calls `GET /books/v3/estimates?customer_id={id}&sort_column=date&sort_order=D`. Returns newest-first. Zoho caps at 200 per response — acceptable ceiling for MVP.
+Calls `GET /books/v3/estimates?customer_id={id}&sort_column=date&sort_order=D&page={page}&per_page={perPage}`. Returns newest-first. `hasMore` is read from Zoho's `page_context.has_more_page`. `page` is echoed back so the caller can trust what Zoho actually returned (handles the case where a bad page number falls past the end).
 
 **On Zoho "draft" vs "sent":**
 
@@ -133,12 +146,29 @@ Dark theme matching the rest of the portal (`bg-[#0a0a0a]`, bronze accents).
 
 Not clickable in 5d.1. Detail links activate when 5d.2 lands.
 
+### Pagination Controls
+
+Below the table:
+
+```
+                    ← Previous    Page 2    Next →
+```
+
+- "Previous" hidden on page 1; "Next" hidden when `hasMore === false`
+- Both render as `<Link>` components (plain anchors, no client JS) bound to `/portal/quotes?page={n}`
+- "Page N" is plain text (no page-number list — keeps scope minimal, works for arbitrary total counts)
+- Omitted entirely when `page === 1 && !hasMore` (everything fits on one page)
+
 ### Empty State
+
+Shown when `page === 1 && estimates.length === 0`:
 
 ```
 You haven't submitted any quotes yet.
 [Browse Collections] → /eyeglasses
 ```
+
+If the user manually jumps to a page that falls past the end (e.g., `?page=50` with only 5 quotes), Zoho will return an empty array with `hasMore: false`. In that case, render a lightweight "No quotes on this page. [Back to page 1]" instead of the first-time empty state.
 
 ### Error State
 
@@ -210,22 +240,6 @@ Start with Option A when triggered.
 
 ---
 
-## Deferred: Pagination Plan
-
-**Current behavior:** show all, newest first. Zoho caps at 200 per response — any estimates past the first 200 are silently dropped.
-
-**Trigger to revisit:**
-- Any partner's estimate count crosses 100
-- Page load time exceeds 1s
-
-**Implementation when needed:**
-1. Add `page` + `per_page` params to `getEstimatesForContact`
-2. Read `page_context.total` + `page_context.has_more_page` from Zoho response
-3. Add Prev/Next buttons bound to `searchParams.page`
-4. Default 20/page
-
----
-
 ## File Changes
 
 ### New Files
@@ -254,8 +268,10 @@ No new dependencies.
 ### Unit Tests
 
 **`__tests__/lib/zoho/books-estimates-list.test.ts`:**
-- `getEstimatesForContact` calls `zohoFetch` with the correct URL + params (`customer_id`, `sort_column=date`, `sort_order=D`)
-- Returns the `estimates` array from the response (including `draft` rows — no filter)
+- `getEstimatesForContact` calls `zohoFetch` with the correct URL + params (`customer_id`, `sort_column=date`, `sort_order=D`, `page`, `per_page`)
+- Defaults to `page=1`, `perPage=20` when options are omitted
+- Returns `{ estimates, page, hasMore }`; `estimates` includes `draft` rows (no filter)
+- Reads `hasMore` from Zoho's `page_context.has_more_page`
 - Throws when Zoho returns malformed data (Zod parse failure)
 - Propagates Zoho errors (doesn't swallow)
 - `partnerLabelForEstimateStatus` maps each of the 6 known statuses correctly
@@ -266,12 +282,17 @@ No new dependencies.
 
 **`__tests__/app/portal/quotes.test.tsx`:**
 - Renders table with sample estimate rows (3 different statuses); each row shows Quote #, formatted date, partner status label, formatted total
-- Renders empty state with "Browse Collections" link when list is empty
+- Renders first-time empty state with "Browse Collections" link when page 1 returns no rows
+- Renders "back to page 1" empty state when a later page returns no rows
 - Renders generic error state when `getEstimatesForContact` throws
 - Status pill element carries the expected class per status (e.g., "Confirmed" row has `text-bronze`)
 - Non-partner user → redirects to `/pending-approval` (mock Clerk)
 - Unauthenticated user → redirects to `/sign-in`
 - Partner missing `zohoContactId` → renders account setup error (distinct copy from generic Zoho error)
+- Invalid `?page=` values (non-numeric, negative, zero) clamp to page 1
+- Pagination controls hidden entirely on single-page result (`page === 1 && !hasMore`)
+- "Previous" hidden on page 1; "Next" hidden when `hasMore === false`
+- Prev/Next links point to the correct `?page=` target
 
 Target: maintain current ≥90% coverage floor on touched modules.
 
