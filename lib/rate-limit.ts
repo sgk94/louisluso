@@ -50,3 +50,16 @@ export async function rateLimitQuote(
   const { success, remaining } = await quoteLimiter.limit(identifier);
   return { success, remaining };
 }
+
+const quotesListLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(30, "5 m"),
+  prefix: "louisluso:quotes-list",
+});
+
+export async function rateLimitQuotesList(
+  identifier: string
+): Promise<RateLimitResult> {
+  const { success, remaining } = await quotesListLimiter.limit(identifier);
+  return { success, remaining };
+}
