@@ -24,6 +24,7 @@
 ### Website Phase 5a: Portal Foundation — COMPLETE
 ### Website Phase 5b: Partner Pricing — COMPLETE
 ### Website Phase 5c: Cart/Quote — COMPLETE
+### Website Phase 5d.1: My Quotes — COMPLETE
 
 ### Product Data (Ken)
 - [ ] Provide T-series color code reference chart (C1=?, C2=?, etc.)
@@ -40,10 +41,22 @@
 
 ## MEDIUM — Next 2 Months
 
-### Website Phase 5d: Orders/Favorites (Shawn) — NEXT
-- [ ] Order history from Zoho Books
-- [ ] Invoice viewing
-- [ ] Favorites / one-click reorder
+### Website Phase 5d.2: Order detail (Shawn) — NEXT
+- [ ] Drill into single estimate/sales order at `/portal/orders/[id]`
+- [ ] Line items, prices, status, notes
+- [ ] Click-through from `/portal/quotes` row
+
+### Website Phase 5d.3: Invoices + pay links (Shawn)
+- [ ] List invoices at `/portal/invoices`
+- [ ] Zoho Books public `invoice_url` for Stripe payment
+
+### Website Phase 5d.4: Favorites (Shawn)
+- [ ] Heart icon on product detail (partners only)
+- [ ] `/portal/favorites` page, stored in Clerk metadata
+
+### Website Phase 5d.5: Reorder (Shawn)
+- [ ] "Reorder" button on past sales orders
+- [ ] Rebuilds cart with current pricing
 
 ### Infrastructure
 - [ ] Connect Stripe to Zoho Books — Ken

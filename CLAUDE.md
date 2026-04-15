@@ -3,7 +3,7 @@
 ## About
 E-commerce eyewear retailer (B2B wholesale to optical stores + B2C catalog). Domain registered through Bluehost, hosted on AWS (being migrated to Vercel).
 
-## New Website (in progress — Phase 5c complete)
+## New Website (in progress — Phase 5d.1 complete)
 Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpowers/specs/2026-04-08-louisluso-website-redesign.md` for full spec.
 
 ### Stack
@@ -19,7 +19,7 @@ Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpower
 - **Newsletter:** Zoho Campaigns
 - **Email:** Gmail API (cs@louisluso.com)
 - **Fonts:** Cormorant Garamond (headings) + DM Sans (body) via next/font
-- **Testing:** Vitest, React Testing Library (287 tests)
+- **Testing:** Vitest, React Testing Library (324 tests)
 - **Package Manager:** pnpm
 
 ### Project Structure (new site files)
@@ -28,7 +28,7 @@ Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpower
 - `lib/zoho/auth.ts` — Zoho OAuth2 token management with deduplication
 - `lib/zoho/client.ts` — Base HTTP client (auto-detects product, sets correct org header)
 - `lib/zoho/inventory.ts` — Zoho Inventory API (items, groups, price books)
-- `lib/zoho/books.ts` — Zoho Books API (sales orders, invoices)
+- `lib/zoho/books.ts` — Zoho Books API (sales orders, invoices, estimates list/detail/cached, status mapper, `ESTIMATES_LIST_CACHE_TAG`)
 - `lib/zoho/crm.ts` — Zoho CRM API (leads with Region/Country, contacts, searchLeads, file attachments)
 - `lib/crm/regions.ts` — Regional CRM: 5 metro regions (zip prefix matching), location knowledge base CRUD
 - `lib/catalog/collections.ts` — Static collection config (21 collections, SKU prefix/brand matching)
@@ -55,7 +55,10 @@ Replacing WordPress/WooCommerce with a custom Next.js site. See `docs/superpower
 - `app/components/CartProvider.tsx` — Cart context provider (partners only)
 - `app/components/CartIcon.tsx` — Shopping bag with bronze count badge in nav
 - `app/components/VariantQuoteTable.tsx` — Per-variant quantity table on product detail (partners)
-- `app/portal/quote/page.tsx` — Quote review/edit + submit to Zoho Books Estimate
+- `app/portal/quote/page.tsx` — Quote review/edit + submit → redirects to success page on POST success
+- `app/portal/quote/success/[estimateNumber]/page.tsx` — Post-submit summary w/ line items + action buttons
+- `app/portal/quotes/page.tsx` — Partner quotes list (paginated, cached 60s, rate-limited per user)
+- `app/portal/quotes/QuotesTable.tsx` — Presentational table w/ status pills + prev/next pagination
 - `proxy.ts` — Clerk middleware (protects /portal routes)
 - `__tests__/` — Vitest test files
 - `.env.local` — Local environment variables (gitignored)
@@ -76,7 +79,11 @@ Three-tier pricing from Zoho Inventory:
    - **5a Portal Foundation** — COMPLETE (auto-matching via Zoho CRM, dashboard, account page, UserMenu, invite script)
    - **5b Partner Pricing** — COMPLETE (listing price in catalog, PartnerPrice component, pricing API, "Find a Dealer" hidden for partners)
    - **5c Cart/Quote** — COMPLETE (cart state w/ localStorage + multi-tab sync, VariantQuoteTable, /portal/quote page, POST /api/portal/quote → Zoho Books Estimate + Gmail confirmation, server-side pricing, rate limits)
-   - **5d Orders/Favorites** — next (order history, invoices, favorites, reorder)
+   - **5d.1 My Quotes** — COMPLETE (/portal/quotes list w/ pagination, Zoho Books Estimates API, unstable_cache 60s TTL, 30req/5min rate limit, /portal/quote/success/[id] summary page with line items + action buttons, revalidateTag on submit invalidates list cache)
+   - **5d.2 Order detail** — next (drill into single estimate/sales order)
+   - **5d.3 Invoices + pay links** — invoice list with Stripe payment URLs
+   - **5d.4 Favorites** — heart icon + /portal/favorites
+   - **5d.5 Reorder** — one-click rebuild cart from past order
 6. **Polish & Launch** — GA4, image migration, DNS cutover, WordPress retirement
 
 ## Current Platform (WordPress — being replaced)
