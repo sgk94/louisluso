@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/app/components/CartProvider";
 import { formatPrice } from "@/lib/catalog/format";
 
 export default function QuotePage(): React.ReactElement {
+  const router = useRouter();
   const { items, subtotal, totalQuantity, update, remove, clear } = useCart();
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState<string | null>(null);
   const [error, setError] = useState("");
 
   async function handleSubmit(): Promise<void> {
@@ -32,36 +33,18 @@ export default function QuotePage(): React.ReactElement {
 
       if (!response.ok) {
         setError(data.error ?? "Failed to submit quote");
+        setSubmitting(false);
         return;
       }
 
-      setSubmitted(data.estimateNumber);
       clear();
+      router.push(
+        `/portal/quote/success/${encodeURIComponent(data.estimateNumber)}`,
+      );
     } catch {
       setError("Unable to submit quote. Please try again.");
-    } finally {
       setSubmitting(false);
     }
-  }
-
-  if (submitted) {
-    return (
-      <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#0a0a0a] px-4">
-        <div className="max-w-md text-center">
-          <h1 className="font-heading text-3xl text-white">Quote Submitted</h1>
-          <p className="mt-4 text-sm text-gray-400">
-            Your quote ({submitted}) has been received. We&apos;ll review
-            availability and confirm shortly.
-          </p>
-          <Link
-            href="/eyeglasses"
-            className="mt-8 inline-block border border-bronze px-6 py-2.5 text-xs font-medium uppercase tracking-[2px] text-bronze transition-colors hover:bg-bronze hover:text-white"
-          >
-            Continue Shopping
-          </Link>
-        </div>
-      </main>
-    );
   }
 
   if (items.length === 0) {
@@ -151,17 +134,25 @@ export default function QuotePage(): React.ReactElement {
 
         <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-6">
           <div className="flex gap-4">
-            <Link href="/eyeglasses" className="text-xs text-bronze hover:underline">
+            <Link
+              href="/eyeglasses"
+              className="text-xs text-bronze hover:underline"
+            >
               Continue Shopping
             </Link>
-            <button onClick={clear} className="text-xs text-gray-500 hover:text-red-400">
+            <button
+              onClick={clear}
+              className="text-xs text-gray-500 hover:text-red-400"
+            >
               Clear All
             </button>
           </div>
 
           <div className="text-right">
             <p className="text-sm text-gray-400">Subtotal</p>
-            <p className="text-xl font-semibold text-white">{formatPrice(subtotal)}</p>
+            <p className="text-xl font-semibold text-white">
+              {formatPrice(subtotal)}
+            </p>
             <button
               onClick={handleSubmit}
               disabled={submitting}
