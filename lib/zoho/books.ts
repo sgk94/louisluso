@@ -176,10 +176,9 @@ const ESTIMATE_STATUS_LABELS: Record<string, string> = {
 };
 
 export function partnerLabelForEstimateStatus(status: string): string {
-  if (Object.prototype.hasOwnProperty.call(ESTIMATE_STATUS_LABELS, status)) {
+  if (status in ESTIMATE_STATUS_LABELS) {
     return ESTIMATE_STATUS_LABELS[status];
   }
-  if (status.length === 0) return "";
   return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
@@ -187,7 +186,14 @@ const estimateListItemSchema = z.object({
   estimate_id: z.string(),
   estimate_number: z.string(),
   date: z.string(),
-  status: z.string(),
+  status: z.enum([
+    "draft",
+    "sent",
+    "accepted",
+    "declined",
+    "expired",
+    "invoiced",
+  ]),
   total: z.number(),
   currency_code: z.string(),
 });
@@ -211,6 +217,9 @@ export async function getEstimatesForContact(
   const response = await zohoFetch<unknown>("/books/v3/estimates", {
     params: {
       customer_id: customerId,
+      // Sort by estimate date, not created_time — matches the partner's mental
+      // model ("newest quote first") and is the canonical Zoho-supported sort
+      // field for the estimates endpoint.
       sort_column: "date",
       sort_order: "D",
       page: String(page),
@@ -221,7 +230,7 @@ export async function getEstimatesForContact(
   const parsed = estimatesListResponseSchema.parse(response);
 
   return {
-    estimates: parsed.estimates as ZohoEstimateListItem[],
+    estimates: parsed.estimates,
     page,
     hasMore: parsed.page_context?.has_more_page ?? false,
   };

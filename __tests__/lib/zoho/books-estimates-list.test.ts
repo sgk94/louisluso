@@ -123,6 +123,29 @@ describe("getEstimatesForContact", () => {
     await expect(getEstimatesForContact("cust-1")).rejects.toThrow();
   });
 
+  it("throws when status is an unknown value", async () => {
+    mockZohoFetch.mockResolvedValueOnce({
+      estimates: [{ ...sampleEstimate, status: "bogus" }],
+    });
+    await expect(getEstimatesForContact("cust-1")).rejects.toThrow();
+  });
+
+  it("throws when total is missing", async () => {
+    mockZohoFetch.mockResolvedValueOnce({
+      estimates: [
+        {
+          estimate_id: "est-1",
+          estimate_number: "EST-00001",
+          date: "2026-04-12",
+          status: "sent",
+          // total missing
+          currency_code: "USD",
+        },
+      ],
+    });
+    await expect(getEstimatesForContact("cust-1")).rejects.toThrow();
+  });
+
   it("propagates Zoho errors", async () => {
     mockZohoFetch.mockRejectedValueOnce(new Error("Zoho 500"));
     await expect(getEstimatesForContact("cust-1")).rejects.toThrow("Zoho 500");
