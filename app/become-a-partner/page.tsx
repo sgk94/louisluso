@@ -76,7 +76,7 @@ export default function BecomeAPartnerPage(): React.ReactElement {
       <main className="px-4 py-24 sm:px-6">
         <div className="mx-auto max-w-3xl text-center">
           <h1 className="font-heading text-4xl">Thank You</h1>
-          <p className="mt-4 text-gray-600">We&apos;ve received your application and will review it within 2-3 business days. We&apos;ll be in touch!</p>
+          <p className="mt-4 text-gray-600">We&apos;ve received your application and will review it within 2-3 business days.</p>
         </div>
       </main>
     );
