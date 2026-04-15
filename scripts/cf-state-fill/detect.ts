@@ -191,8 +191,7 @@ async function main(): Promise<void> {
     const currentCity = readField(detail, "cf_city");
     const addr = pickAddress(detail);
     const proposedState = toStateCode(addr.state, addr.country) ?? "";
-    // City: take as-is (preserve casing from address). Skip if empty.
-    const proposedCity = addr.city;
+    const proposedCity = addr.city.trim().replace(/\s+/g, " ").toUpperCase();
 
     const row: Row = {
       contact_id: detail.contact_id,

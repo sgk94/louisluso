@@ -32,14 +32,27 @@ const CA_PROVINCE_NAME_TO_CODE: Record<string, string> = {
   saskatchewan: "SK", yukon: "YT",
 };
 
-function isCanada(country: string | undefined): boolean {
-  return /^(canada|ca|can)$/i.test((country ?? "").trim());
+function normalizeCountry(country: string | undefined | null): string {
+  // Strip whitespace + periods so "U.S.A." / "U.S.A" / "USA." all collapse to "USA".
+  return String(country ?? "").trim().replace(/\./g, "").toUpperCase();
 }
 
-function isUSA(country: string | undefined): boolean {
-  if (!country) return false;
-  return /^(usa|us|u\.s\.|u\.s\.a\.|united states|united states of america)$/i.test(
-    country.trim(),
+function isCanada(country: string | undefined | null): boolean {
+  const c = normalizeCountry(country);
+  return c === "CANADA" || c === "CAN";
+  // NOTE: "CA" intentionally NOT treated as Canada here — collides with California.
+}
+
+function isUSA(country: string | undefined | null): boolean {
+  const c = normalizeCountry(country);
+  if (!c) return false;
+  return (
+    c === "USA" ||
+    c === "US" ||
+    c === "USOFA" ||
+    c === "UNITED STATES" ||
+    c === "UNITED STATES OF AMERICA" ||
+    c === "AMERICA"
   );
 }
 

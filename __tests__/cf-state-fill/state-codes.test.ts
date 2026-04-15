@@ -40,6 +40,22 @@ describe("toStateCode", () => {
     expect(toStateCode("BC")).toBe("BC");
   });
 
+  it("USA country hint accepts common variants", () => {
+    expect(toStateCode("CA", "U.S.A")).toBe("CA");
+    expect(toStateCode("CA", "U.S.A.")).toBe("CA");
+    expect(toStateCode("CA", "U.S.")).toBe("CA");
+    expect(toStateCode("CA", "us")).toBe("CA");
+    expect(toStateCode("CA", "United States")).toBe("CA");
+    expect(toStateCode("CA", "United States of America")).toBe("CA");
+    expect(toStateCode("CA", "  USA  ")).toBe("CA");
+  });
+
+  it("Canada country hint blocks CA-as-California even with variant spellings", () => {
+    expect(toStateCode("CA", "Canada")).toBeNull();
+    expect(toStateCode("CA", "CANADA")).toBeNull();
+    expect(toStateCode("CA", "  Canada ")).toBeNull();
+  });
+
   it("ignores surrounding whitespace + mixed case", () => {
     expect(toStateCode("  cAlIfOrNiA ")).toBe("CA");
   });

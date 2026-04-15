@@ -71,6 +71,10 @@ const counts: Record<Bucket, number> = {
   "would-overwrite": 0,
 };
 for (const r of data.rows) {
+  // Force uppercase for proposed_cf_city so apply writes are consistent.
+  if (r.proposed_cf_city) {
+    r.proposed_cf_city = r.proposed_cf_city.trim().replace(/\s+/g, " ").toUpperCase();
+  }
   r.bucket = bucketFor(r);
   counts[r.bucket]++;
 }
