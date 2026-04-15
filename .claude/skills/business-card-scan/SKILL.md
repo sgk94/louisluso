@@ -10,7 +10,22 @@ Extract contact information from business card photos and add them to Zoho CRM (
 
 ## How it works
 
-You receive a business card image. You read every piece of text on the card using your vision capability, map it to the contact fields below, enrich the location data, show the user for confirmation, then run the append script.
+You receive (or fetch) business card images. You read every piece of text on each card using your vision capability, map it to the contact fields below, enrich the location data, show the user for confirmation, then run the append script.
+
+## Step 0: Fetch unscanned cards from Google Drive
+
+Cards default to a shared Drive folder. If the user says "scan the unscanned folder" (or anything equivalent) without attaching images, pull them from Drive first:
+
+```bash
+set -a && source .env.local && set +a
+npx tsx .claude/skills/business-card-scan/list-unscanned.ts
+```
+
+The helper uses the canonical unscanned folder ID `1A7BqXvQyfc_uqONyRh0fcU2DRVFLlL0M`, downloads every image in it to `/tmp/drive-cards-unscanned/`, and prints a JSON manifest (`id`, `name`, `path`, `mimeType`) on stdout. Progress logs go to stderr so piping stdout to `jq` works.
+
+Override the folder with `--folder <id>` or the output dir with `--out <dir>`. If the user hands you images directly (attached to a message, or a local path), skip this step.
+
+Use the `path` values from the manifest when reading each card in Step 1.
 
 ## Step 1: Extract all text from the card
 
@@ -149,8 +164,9 @@ npx tsx scripts/append-contact.ts '<JSON>'
 
 ## Key files
 
+- `.claude/skills/business-card-scan/list-unscanned.ts` — Lists + downloads images from the unscanned Drive folder, prints manifest (Step 0)
 - `scripts/append-contact.ts` — Writes to Zoho CRM + Google Sheet + updates knowledge base
 - `lib/crm/regions.ts` — Region config, zip matching, knowledge base read/write
 - `lib/zoho/crm.ts` — Zoho CRM API (createLead)
 - `data/location-kb.json` — Location knowledge base (grows over time)
-- `email/gmail.ts` — Google Sheets API client (OAuth2)
+- `email/gmail.ts` — Google Sheets + Drive API client (OAuth2)
