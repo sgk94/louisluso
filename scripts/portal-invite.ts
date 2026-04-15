@@ -55,44 +55,17 @@ async function main(): Promise<void> {
 
   console.log(`Found: ${firstName} ${contact.Last_Name} — ${company}`);
 
-  const signupUrl = process.env.PORTAL_SIGNUP_URL ?? "https://louisluso.com/sign-up";
+  const { sendPartnerInvite } = await import("../lib/portal/invite.ts");
+  const result = await sendPartnerInvite(contact, { dryRun });
 
-  const subject = "Welcome to the LOUISLUSO Partner Portal";
-  const body = [
-    `Hi ${firstName},`,
-    "",
-    "Great news — your LOUISLUSO partner application has been approved!",
-    "",
-    "You can now access wholesale pricing and place orders through our Partner Portal.",
-    "",
-    `To get started, create your account using this email address (${email}):`,
-    "",
-    signupUrl,
-    "",
-    "Once you've created your account, you'll have access to:",
-    "  - Wholesale pricing on all collections",
-    "  - Online ordering (coming soon)",
-    "  - Order history and tracking (coming soon)",
-    "",
-    "If you have any questions, reply to this email or contact us at cs@louisluso.com.",
-    "",
-    "Welcome aboard!",
-    "",
-    "— The LOUISLUSO Team",
-    "https://louisluso.com",
-  ].join("\n");
-
-  if (dryRun) {
+  if (result.dryRun) {
     console.log("\n--- DRY RUN ---");
     console.log(`To: ${email}`);
-    console.log(`Subject: ${subject}`);
-    console.log(`\n${body}`);
+    console.log(`Subject: ${result.subject}`);
+    console.log(`\n${result.body}`);
     console.log("--- END DRY RUN ---\n");
     return;
   }
-
-  const { sendEmail } = await import("../lib/gmail.ts");
-  await sendEmail({ to: email, subject, body });
 
   console.log(`Invite sent to ${email}`);
 }

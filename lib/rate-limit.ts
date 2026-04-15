@@ -63,3 +63,16 @@ export async function rateLimitQuotesList(
   const { success, remaining } = await quotesListLimiter.limit(identifier);
   return { success, remaining };
 }
+
+const zohoWebhookLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(20, "5 m"),
+  prefix: "louisluso:zoho-webhook",
+});
+
+export async function rateLimitZohoWebhook(
+  identifier: string
+): Promise<RateLimitResult> {
+  const { success, remaining } = await zohoWebhookLimiter.limit(identifier);
+  return { success, remaining };
+}

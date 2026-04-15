@@ -44,6 +44,17 @@ const envSchema = z.object({
     .string()
     .email("PARTNER_APP_NOTIFY_EMAIL must be a valid email"),
 
+  // Shared secret for Zoho CRM workflow webhooks (min 32 chars)
+  ZOHO_WEBHOOK_SECRET: z
+    .string()
+    .min(32, "ZOHO_WEBHOOK_SECRET must be at least 32 characters"),
+
+  // Partner portal sign-up URL used in the welcome/invite email
+  PORTAL_SIGNUP_URL: z
+    .string()
+    .url("PORTAL_SIGNUP_URL must be a valid URL")
+    .default("https://louisluso.com/sign-up"),
+
   // Mapbox (optional — only needed for /find-a-dealer page)
   NEXT_PUBLIC_MAPBOX_TOKEN: z.string().default(""),
 

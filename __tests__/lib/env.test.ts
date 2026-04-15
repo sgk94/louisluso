@@ -16,6 +16,7 @@ const VALID_ENV = {
   GMAIL_CLIENT_SECRET: "gmail-client-secret",
   GMAIL_REFRESH_TOKEN: "gmail-refresh-token",
   PARTNER_APP_NOTIFY_EMAIL: "notify-test@example.com",
+  ZOHO_WEBHOOK_SECRET: "test-secret-that-is-at-least-32-chars-aaaa",
   NEXT_PUBLIC_MAPBOX_TOKEN: "pk.test-mapbox-token",
 } as const;
 
