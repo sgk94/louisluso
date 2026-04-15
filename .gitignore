@@ -21,6 +21,9 @@ assets/cards-inbox/
 # Location knowledge base (grows over time with real city data)
 data/location-kb.json
 
+# cf-state-fill run artifacts (preview, backup, apply log)
+data/cf-state-fill/
+
 # Build artifacts
 tsconfig.tsbuildinfo
 

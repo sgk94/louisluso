@@ -421,11 +421,15 @@ interface BooksContactDetailResponse {
 export async function getBooksContact(
   contactId: string,
 ): Promise<ZohoBooksContact> {
+  const parsed = zohoIdSchema.safeParse(contactId);
+  if (!parsed.success) {
+    throw new Error("Invalid contact ID");
+  }
   const res = await zohoFetch<BooksContactDetailResponse>(
-    `/books/v3/contacts/${contactId}`,
+    `/books/v3/contacts/${parsed.data}`,
   );
   if (!res.contact) {
-    throw new Error(`Books contact ${contactId} not found`);
+    throw new Error(`Books contact ${parsed.data} not found`);
   }
   return res.contact;
 }
