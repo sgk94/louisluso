@@ -239,6 +239,71 @@ export async function getEstimatesForContact(
 
 export const ESTIMATES_LIST_CACHE_TAG = "zoho-estimates-list";
 
+const estimateDetailLineItemSchema = z.object({
+  line_item_id: z.string(),
+  item_id: z.string(),
+  name: z.string(),
+  sku: z.string().optional(),
+  description: z.string().optional(),
+  quantity: z.number(),
+  rate: z.number(),
+  item_total: z.number(),
+});
+
+const estimateDetailSchema = z.object({
+  estimate_id: z.string(),
+  estimate_number: z.string(),
+  customer_id: z.string(),
+  date: z.string(),
+  status: z.enum(["draft", "sent", "accepted", "declined", "expired", "invoiced"]),
+  total: z.number(),
+  sub_total: z.number(),
+  currency_code: z.string(),
+  line_items: z.array(estimateDetailLineItemSchema),
+});
+
+const estimateDetailResponseSchema = z.object({
+  estimate: estimateDetailSchema,
+});
+
+const estimateSearchResponseSchema = z.object({
+  estimates: z.array(
+    z.object({
+      estimate_id: z.string(),
+      estimate_number: z.string(),
+      customer_id: z.string(),
+    }),
+  ),
+});
+
+export type ZohoEstimateDetail = z.infer<typeof estimateDetailSchema>;
+
+export async function getEstimateByNumber(
+  customerId: string,
+  estimateNumber: string,
+): Promise<ZohoEstimateDetail | null> {
+  const searchResponse = await zohoFetch<unknown>("/books/v3/estimates", {
+    params: {
+      customer_id: customerId,
+      estimate_number: estimateNumber,
+    },
+  });
+  const searchParsed = estimateSearchResponseSchema.parse(searchResponse);
+  const match = searchParsed.estimates.find(
+    (e) => e.estimate_number === estimateNumber && e.customer_id === customerId,
+  );
+  if (!match) return null;
+
+  const detailResponse = await zohoFetch<unknown>(
+    `/books/v3/estimates/${match.estimate_id}`,
+  );
+  const detailParsed = estimateDetailResponseSchema.parse(detailResponse);
+
+  if (detailParsed.estimate.customer_id !== customerId) return null;
+
+  return detailParsed.estimate;
+}
+
 const cachedGetEstimatesForContact = unstable_cache(
   async (customerId: string, page: number, perPage: number) => {
     return getEstimatesForContact(customerId, { page, perPage });
