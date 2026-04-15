@@ -12,6 +12,10 @@ describe("normalize helpers", () => {
     expect(normCompany("")).toBe("");
   });
 
+  it("normCompany handles undefined", () => {
+    expect(normCompany(undefined)).toBe("");
+  });
+
   it("normPhone keeps only digits", () => {
     expect(normPhone("(630) 855-5542")).toBe("6308555542");
     expect(normPhone("")).toBe("");
@@ -21,5 +25,9 @@ describe("normalize helpers", () => {
     expect(buildMatchKey("FOO@bar.com", "Acme")).toBe("email:foo@bar.com");
     expect(buildMatchKey("", "Acme Optical")).toBe("company:acmeoptical");
     expect(buildMatchKey("", "")).toBe("");
+  });
+
+  it("buildMatchKey handles undefined inputs", () => {
+    expect(buildMatchKey(undefined, undefined)).toBe("");
   });
 });

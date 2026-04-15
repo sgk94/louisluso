@@ -3,7 +3,7 @@ export function normEmail(s: string | undefined): string {
 }
 
 export function normCompany(s: string | undefined): string {
-  return (s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "").trim();
+  return (s ?? "").trim().toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
 export function normPhone(s: string | undefined): string {
