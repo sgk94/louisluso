@@ -4,6 +4,8 @@ import { partnerSchema } from "@/lib/schemas/partner";
 import { createLead, attachFileToLead } from "@/lib/zoho/crm";
 import type { CRMLeadInput } from "@/lib/zoho/crm";
 import { rateLimit } from "@/lib/rate-limit";
+import { sendEmail } from "@/lib/gmail";
+import { env } from "@/lib/env";
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
@@ -72,6 +74,32 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     if (fileBuffer) {
       await attachFileToLead(leadId, fileBuffer, file!.name);
+    }
+
+    // Best-effort notification — failure must not roll back the lead.
+    try {
+      const body = [
+        `New partner application received.`,
+        "",
+        `Company: ${data.company}`,
+        `Contact: ${data.contactName}`,
+        `Email: ${data.email}`,
+        `Phone: ${data.phone}`,
+        `Address: ${data.address}, ${data.city}, ${data.state} ${data.zip}`,
+        `Referral: ${referral}`,
+        `Credit application: ${fileBuffer ? "attached (see Zoho CRM lead)" : "not provided"}`,
+        "",
+        `Zoho CRM lead ID: ${leadId}`,
+      ].join("\n");
+
+      await sendEmail({
+        to: env.PARTNER_APP_NOTIFY_EMAIL,
+        replyTo: data.email,
+        subject: `Partner Application — ${data.company}`,
+        body,
+      });
+    } catch (notifyErr) {
+      console.error("Partner application notification email failed:", notifyErr);
     }
 
     return NextResponse.json({ success: true });

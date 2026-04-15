@@ -15,6 +15,7 @@ const VALID_ENV = {
   GMAIL_CLIENT_ID: "gmail-client-id",
   GMAIL_CLIENT_SECRET: "gmail-client-secret",
   GMAIL_REFRESH_TOKEN: "gmail-refresh-token",
+  PARTNER_APP_NOTIFY_EMAIL: "notify-test@example.com",
   NEXT_PUBLIC_MAPBOX_TOKEN: "pk.test-mapbox-token",
 } as const;
 

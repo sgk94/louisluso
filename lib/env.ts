@@ -39,6 +39,11 @@ const envSchema = z.object({
   GMAIL_CLIENT_SECRET: z.string().min(1, "GMAIL_CLIENT_SECRET is required"),
   GMAIL_REFRESH_TOKEN: z.string().min(1, "GMAIL_REFRESH_TOKEN is required"),
 
+  // Internal notification recipient for partner applications
+  PARTNER_APP_NOTIFY_EMAIL: z
+    .string()
+    .email("PARTNER_APP_NOTIFY_EMAIL must be a valid email"),
+
   // Mapbox (optional — only needed for /find-a-dealer page)
   NEXT_PUBLIC_MAPBOX_TOKEN: z.string().default(""),
 
