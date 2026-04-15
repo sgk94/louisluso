@@ -36,4 +36,12 @@ describe("UserMenu", () => {
     await userEvent.click(document.body);
     expect(screen.queryByText("Dashboard")).toBeNull();
   });
+
+  it("renders the My Quotes link above Account", async () => {
+    render(<UserMenu />);
+    await userEvent.click(screen.getByRole("button", { name: /account menu/i }));
+    const myQuotes = screen.getByText("My Quotes");
+    expect(myQuotes).toBeDefined();
+    expect(myQuotes.closest("a")?.getAttribute("href")).toBe("/portal/quotes");
+  });
 });

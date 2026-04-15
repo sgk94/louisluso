@@ -7,6 +7,7 @@ import { UserCircleIcon } from "@heroicons/react/24/outline";
 
 const MENU_ITEMS = [
   { label: "Dashboard", href: "/portal", enabled: true },
+  { label: "My Quotes", href: "/portal/quotes", enabled: true },
   { label: "Orders", href: "/portal/orders", enabled: false },
   { label: "Favorites", href: "/portal/favorites", enabled: false },
   { label: "Account", href: "/portal/account", enabled: true },
