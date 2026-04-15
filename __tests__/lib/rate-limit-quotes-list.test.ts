@@ -1,11 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { mockLimit } = vi.hoisted(() => ({ mockLimit: vi.fn() }));
+const { mockLimit, mockCtor, mockSlidingWindow } = vi.hoisted(() => ({
+  mockLimit: vi.fn(),
+  mockCtor: vi.fn(),
+  mockSlidingWindow: vi.fn(() => "sliding-window-config"),
+}));
 
 vi.mock("@upstash/ratelimit", () => ({
   Ratelimit: class {
-    static slidingWindow = vi.fn(() => "sliding-window-config");
+    static slidingWindow = mockSlidingWindow;
     limit = mockLimit;
+    constructor(config: unknown) {
+      mockCtor(config);
+    }
   },
 }));
 vi.mock("@upstash/redis", () => ({ Redis: vi.fn() }));
@@ -20,6 +27,13 @@ describe("rateLimitQuotesList", () => {
     mockLimit.mockReset();
   });
 
+  it("is configured with correct window, count, and prefix", () => {
+    expect(mockSlidingWindow).toHaveBeenCalledWith(30, "5 m");
+    expect(mockCtor).toHaveBeenCalledWith(
+      expect.objectContaining({ prefix: "louisluso:quotes-list" }),
+    );
+  });
+
   it("returns success true when limit not exceeded", async () => {
     mockLimit.mockResolvedValueOnce({ success: true, remaining: 29 });
     const result = await rateLimitQuotesList("user-abc");
@@ -31,5 +45,6 @@ describe("rateLimitQuotesList", () => {
     mockLimit.mockResolvedValueOnce({ success: false, remaining: 0 });
     const result = await rateLimitQuotesList("user-abc");
     expect(result).toEqual({ success: false, remaining: 0 });
+    expect(mockLimit).toHaveBeenCalledWith("user-abc");
   });
 });
