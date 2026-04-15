@@ -182,3 +182,47 @@ export function partnerLabelForEstimateStatus(status: string): string {
   if (status.length === 0) return "";
   return status.charAt(0).toUpperCase() + status.slice(1);
 }
+
+const estimateListItemSchema = z.object({
+  estimate_id: z.string(),
+  estimate_number: z.string(),
+  date: z.string(),
+  status: z.string(),
+  total: z.number(),
+  currency_code: z.string(),
+});
+
+const estimatesListResponseSchema = z.object({
+  estimates: z.array(estimateListItemSchema),
+  page_context: z
+    .object({
+      has_more_page: z.boolean().optional(),
+    })
+    .optional(),
+});
+
+export async function getEstimatesForContact(
+  customerId: string,
+  options?: EstimateListOptions,
+): Promise<EstimateListResult> {
+  const page = options?.page ?? 1;
+  const perPage = options?.perPage ?? 20;
+
+  const response = await zohoFetch<unknown>("/books/v3/estimates", {
+    params: {
+      customer_id: customerId,
+      sort_column: "date",
+      sort_order: "D",
+      page: String(page),
+      per_page: String(perPage),
+    },
+  });
+
+  const parsed = estimatesListResponseSchema.parse(response);
+
+  return {
+    estimates: parsed.estimates as ZohoEstimateListItem[],
+    page,
+    hasMore: parsed.page_context?.has_more_page ?? false,
+  };
+}
