@@ -19,10 +19,10 @@ export default async function PortalDashboard(): Promise<React.ReactElement> {
       enabled: true,
     },
     {
-      title: "View Orders",
-      description: "Coming soon",
-      href: "/portal/orders",
-      enabled: false,
+      title: "My Quotes",
+      description: "Review submitted quotes and their status",
+      href: "/portal/quotes",
+      enabled: true,
     },
     {
       title: "Account Settings",
