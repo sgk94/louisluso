@@ -5,12 +5,14 @@ const { mockSendEmail } = vi.hoisted(() => ({ mockSendEmail: vi.fn() }));
 const { mockRateLimitQuote } = vi.hoisted(() => ({ mockRateLimitQuote: vi.fn() }));
 const { mockCurrentUser } = vi.hoisted(() => ({ mockCurrentUser: vi.fn() }));
 const { mockGetItems } = vi.hoisted(() => ({ mockGetItems: vi.fn() }));
+const { mockRevalidateTag } = vi.hoisted(() => ({ mockRevalidateTag: vi.fn() }));
 
-vi.mock("@/lib/zoho/books", () => ({ createEstimate: mockCreateEstimate }));
+vi.mock("@/lib/zoho/books", () => ({ createEstimate: mockCreateEstimate, ESTIMATES_LIST_CACHE_TAG: "zoho-estimates-list" }));
 vi.mock("@/lib/gmail", () => ({ sendEmail: mockSendEmail }));
 vi.mock("@/lib/rate-limit", () => ({ rateLimitQuote: mockRateLimitQuote }));
 vi.mock("@clerk/nextjs/server", () => ({ currentUser: mockCurrentUser }));
 vi.mock("@/lib/zoho/inventory", () => ({ getItems: mockGetItems }));
+vi.mock("next/cache", () => ({ revalidateTag: mockRevalidateTag }));
 
 import { POST } from "@/app/api/portal/quote/route";
 
@@ -43,6 +45,7 @@ describe("POST /api/portal/quote", () => {
     mockRateLimitQuote.mockReset().mockResolvedValue({ success: true, remaining: 4 });
     mockCurrentUser.mockReset();
     mockGetItems.mockReset().mockResolvedValue(ZOHO_ITEMS);
+    mockRevalidateTag.mockReset();
   });
 
   // --- auth / rate limit ---
@@ -178,5 +181,34 @@ describe("POST /api/portal/quote", () => {
     expect(response.status).toBe(500);
     // email should not have been attempted
     expect(mockSendEmail).not.toHaveBeenCalled();
+  });
+
+  // --- cache revalidation ---
+
+  it("calls revalidateTag('zoho-estimates-list') after successful submission", async () => {
+    mockCurrentUser.mockResolvedValue(PARTNER_USER);
+
+    const response = await POST(makeRequest({
+      items: [{ itemId: "item-1", quantity: 1, price: 76 }],
+    }));
+
+    expect(response.status).toBe(200);
+    expect(mockRevalidateTag).toHaveBeenCalledWith("zoho-estimates-list");
+  });
+
+  it("does not fail the submission when revalidateTag throws", async () => {
+    mockCurrentUser.mockResolvedValue(PARTNER_USER);
+    mockRevalidateTag.mockImplementation(() => {
+      throw new Error("cache unavailable");
+    });
+
+    const response = await POST(makeRequest({
+      items: [{ itemId: "item-1", quantity: 1, price: 76 }],
+    }));
+
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data.success).toBe(true);
+    expect(data.estimateNumber).toBe("EST-00001");
   });
 });

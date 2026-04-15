@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { currentUser } from "@clerk/nextjs/server";
-import { createEstimate } from "@/lib/zoho/books";
+import { createEstimate, ESTIMATES_LIST_CACHE_TAG } from "@/lib/zoho/books";
 import { getItems } from "@/lib/zoho/inventory";
 import { sendEmail } from "@/lib/gmail";
 import { rateLimitQuote } from "@/lib/rate-limit";
@@ -69,6 +70,15 @@ export async function POST(request: Request): Promise<NextResponse> {
     }));
 
     const estimate = await createEstimate(zohoContactId, lineItems, notes);
+
+    // Invalidate the cached quotes list so the new estimate appears immediately.
+    // Wrapped in try/catch — a revalidation failure must not roll back a
+    // successful estimate submission.
+    try {
+      revalidateTag(ESTIMATES_LIST_CACHE_TAG);
+    } catch (revalErr) {
+      console.error("Quote cache revalidation failed:", revalErr);
+    }
 
     // Fix 2: email is best-effort — failure must not roll back the estimate
     try {
