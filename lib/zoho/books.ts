@@ -145,3 +145,40 @@ export async function createEstimate(
   );
   return response.estimate;
 }
+
+export interface ZohoEstimateListItem {
+  estimate_id: string;
+  estimate_number: string;
+  date: string;
+  status: "draft" | "sent" | "accepted" | "declined" | "expired" | "invoiced";
+  total: number;
+  currency_code: string;
+}
+
+export interface EstimateListOptions {
+  page?: number;
+  perPage?: number;
+}
+
+export interface EstimateListResult {
+  estimates: ZohoEstimateListItem[];
+  page: number;
+  hasMore: boolean;
+}
+
+const ESTIMATE_STATUS_LABELS: Record<string, string> = {
+  draft: "Pending Review",
+  sent: "Pending Review",
+  accepted: "Confirmed",
+  declined: "Declined",
+  expired: "Expired",
+  invoiced: "Order Placed",
+};
+
+export function partnerLabelForEstimateStatus(status: string): string {
+  if (Object.prototype.hasOwnProperty.call(ESTIMATE_STATUS_LABELS, status)) {
+    return ESTIMATE_STATUS_LABELS[status];
+  }
+  if (status.length === 0) return "";
+  return status.charAt(0).toUpperCase() + status.slice(1);
+}
