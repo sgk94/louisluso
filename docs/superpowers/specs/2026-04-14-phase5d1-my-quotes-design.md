@@ -107,11 +107,18 @@ export function getCachedEstimatesForContact(
 ```
 
 Wraps `getEstimatesForContact` with Next.js `unstable_cache`:
-- **Cache key:** `["estimates", customerId, String(page), String(perPage)]`
-- **Tags:** `[\`quotes-${customerId}\`]`
+- **Key parts:** `["zoho-estimates-list"]`
+- **Cache entries** are keyed automatically by the underlying function's arguments (`customerId`, `page`, `perPage`), so every partner + page combination gets its own entry
+- **Tags:** `["zoho-estimates-list"]` (single static tag — Next.js requires `tags` to be a static `string[]`, no per-customer dynamic tagging available)
 - **Revalidate:** 60 seconds
 
-Invalidation: 5c's `POST /api/portal/quote` calls `revalidateTag(\`quotes-${customerId}\`)` after `createEstimate` succeeds — cached data for that partner is purged across all pages so the new quote appears immediately on navigation. Ken-side status changes in Zoho (draft→sent, sent→accepted) are not invalidated by us; those propagate within the 60s TTL, which is acceptable given those transitions take hours/days.
+Invalidation: 5c's `POST /api/portal/quote` calls `revalidateTag("zoho-estimates-list")` after `createEstimate` succeeds. This invalidates every cached quote list, not just the submitting partner's. Acceptable because:
+- Invalidation is rare (every partner submit = one invalidation)
+- Cached entries just refetch from Zoho on next access (no error — just a cache miss)
+- We avoid maintaining a separate per-customer tag structure in Redis
+- At B2B scale (low concurrent partners), the extra Zoho calls are negligible
+
+Ken-side status changes in Zoho (draft→sent, sent→accepted) are not invalidated by us; those propagate within the 60s TTL, which is acceptable given those transitions take hours/days.
 
 **Estimate detail by number** — new helper in same file (for the success page):
 
@@ -362,14 +369,15 @@ All server-side errors logged with `console.error`, including the `zohoContactId
 
 **Response cache:**
 - `unstable_cache` wrapper around `getEstimatesForContact`
-- Key: `["estimates", customerId, String(page), String(perPage)]`
-- Tags: `[\`quotes-${customerId}\`]`
+- Key parts: `["zoho-estimates-list"]` (per-customer keying is handled via the wrapped function's arguments)
+- Tags: `["zoho-estimates-list"]` (static; Next.js does not support dynamic tag functions in `unstable_cache`)
 - TTL: 60s
 
 **Invalidation from 5c:**
-- `POST /api/portal/quote` calls `revalidateTag(\`quotes-${customerId}\`)` after `createEstimate` succeeds
+- `POST /api/portal/quote` calls `revalidateTag("zoho-estimates-list")` after `createEstimate` succeeds
 - Wrapped in a try/catch — a revalidation error must not roll back the quote submission (same pattern as the email send in 5c)
 - Partner navigating to `/portal/quotes` post-submit sees fresh data
+- Side effect: any other partner whose cache was warm will also get a cache miss. Acceptable at B2B scale.
 
 **Deferred (future escalation if needed):**
 - Background sync to our own store (Postgres/KV) — revisit only if active partner count exceeds ~100 or Zoho call volume approaches the daily cap
@@ -457,7 +465,7 @@ No new dependencies.
 - Partner missing `zohoContactId` → renders account setup error
 
 **Existing test to update — `__tests__/app/api/portal/quote.test.ts`:**
-- Add assertion that `revalidateTag` is called with `quotes-${zohoContactId}` after a successful submission
+- Add assertion that `revalidateTag` is called with `"zoho-estimates-list"` after a successful submission
 - Add assertion that a thrown `revalidateTag` does not cause the endpoint to return an error (wrapped in try/catch)
 
 Target: maintain current ≥90% coverage floor on touched modules.
