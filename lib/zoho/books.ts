@@ -325,3 +325,69 @@ export function getCachedEstimatesForContact(
     options?.perPage ?? 20,
   );
 }
+
+export interface ZohoBooksAddress {
+  address?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  country?: string;
+}
+
+export interface ZohoBooksContactPerson {
+  email?: string;
+  phone?: string;
+  first_name?: string;
+  last_name?: string;
+}
+
+export interface ZohoBooksContact {
+  contact_id: string;
+  contact_name: string;
+  company_name: string;
+  email: string;
+  phone: string;
+  notes?: string;
+  billing_address?: ZohoBooksAddress;
+  shipping_address?: ZohoBooksAddress;
+  contact_persons?: ZohoBooksContactPerson[];
+  status: string;
+  [key: string]: unknown;
+}
+
+interface BooksContactsPageResponse {
+  contacts?: ZohoBooksContact[];
+  page_context?: { has_more_page?: boolean; page?: number };
+}
+
+export async function getAllBooksCustomers(): Promise<ZohoBooksContact[]> {
+  const all: ZohoBooksContact[] = [];
+  let page = 1;
+  while (true) {
+    const res = await zohoFetch<BooksContactsPageResponse>("/books/v3/contacts", {
+      params: { contact_type: "customer", page: String(page), per_page: "200" },
+    });
+    all.push(...(res.contacts ?? []));
+    if (!res.page_context?.has_more_page) break;
+    page += 1;
+  }
+  return all;
+}
+
+export interface BooksContactPatch {
+  company_name?: string;
+  email?: string;
+  phone?: string;
+  notes?: string;
+  shipping_address?: Partial<ZohoBooksAddress>;
+}
+
+export async function updateBooksContact(
+  contactId: string,
+  patch: BooksContactPatch,
+): Promise<void> {
+  await zohoFetch(`/books/v3/contacts/${contactId}`, {
+    method: "PUT",
+    body: patch as unknown as Record<string, unknown>,
+  });
+}
