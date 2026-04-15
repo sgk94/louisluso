@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { z } from "zod";
 import { zohoFetch } from "@/lib/zoho/client";
 
@@ -234,4 +235,28 @@ export async function getEstimatesForContact(
     page,
     hasMore: parsed.page_context?.has_more_page ?? false,
   };
+}
+
+export const ESTIMATES_LIST_CACHE_TAG = "zoho-estimates-list";
+
+const cachedGetEstimatesForContact = unstable_cache(
+  async (customerId: string, page: number, perPage: number) => {
+    return getEstimatesForContact(customerId, { page, perPage });
+  },
+  ["zoho-estimates-list"],
+  {
+    tags: [ESTIMATES_LIST_CACHE_TAG],
+    revalidate: 60,
+  },
+);
+
+export function getCachedEstimatesForContact(
+  customerId: string,
+  options?: EstimateListOptions,
+): Promise<EstimateListResult> {
+  return cachedGetEstimatesForContact(
+    customerId,
+    options?.page ?? 1,
+    options?.perPage ?? 20,
+  );
 }
