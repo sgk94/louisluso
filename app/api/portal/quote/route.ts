@@ -75,7 +75,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     // Wrapped in try/catch — a revalidation failure must not roll back a
     // successful estimate submission.
     try {
-      revalidateTag(ESTIMATES_LIST_CACHE_TAG);
+      revalidateTag(ESTIMATES_LIST_CACHE_TAG, "max");
     } catch (revalErr) {
       console.error("Quote cache revalidation failed:", revalErr);
     }

@@ -193,7 +193,7 @@ describe("POST /api/portal/quote", () => {
     }));
 
     expect(response.status).toBe(200);
-    expect(mockRevalidateTag).toHaveBeenCalledWith("zoho-estimates-list");
+    expect(mockRevalidateTag).toHaveBeenCalledWith("zoho-estimates-list", "max");
   });
 
   it("does not fail the submission when revalidateTag throws", async () => {
