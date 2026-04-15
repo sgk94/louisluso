@@ -21,14 +21,17 @@ export default async function QuotesPage({
   searchParams: Promise<{ page?: string }>;
 }): Promise<React.ReactElement> {
   const user = await currentUser();
-  // Portal layout has already enforced auth + partner. user is guaranteed non-null and partner.
-  const meta = isPartner(user!.publicMetadata) ? user!.publicMetadata : null;
+  // Portal layout already enforces auth + partner; this is defensive.
+  if (!user) {
+    return <ErrorShell message="Account setup incomplete, contact support." />;
+  }
 
+  const meta = isPartner(user.publicMetadata) ? user.publicMetadata : null;
   if (!meta?.zohoContactId) {
     return <ErrorShell message="Account setup incomplete, contact support." />;
   }
 
-  const { success } = await rateLimitQuotesList(user!.id);
+  const { success } = await rateLimitQuotesList(user.id);
   if (!success) {
     return <ErrorShell message="Too many requests. Please wait a moment and refresh." />;
   }
