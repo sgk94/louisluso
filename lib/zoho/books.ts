@@ -401,7 +401,14 @@ export async function updateBooksContact(
   contactId: string,
   patch: BooksContactPatch,
 ): Promise<void> {
-  await zohoFetch(`/books/v3/contacts/${contactId}`, {
+  const parsed = zohoIdSchema.safeParse(contactId);
+  if (!parsed.success) {
+    throw new Error("Invalid contact ID");
+  }
+  if (Object.keys(patch).length === 0) {
+    throw new Error("updateBooksContact: patch must not be empty");
+  }
+  await zohoFetch(`/books/v3/contacts/${parsed.data}`, {
     method: "PUT",
     body: patch as unknown as Record<string, unknown>,
   });
