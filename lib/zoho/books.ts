@@ -360,18 +360,32 @@ interface BooksContactsPageResponse {
   page_context?: { has_more_page?: boolean; page?: number };
 }
 
+const BOOKS_CUSTOMER_MAX_PAGES = 200;
+
 export async function getAllBooksCustomers(): Promise<ZohoBooksContact[]> {
   const all: ZohoBooksContact[] = [];
   let page = 1;
-  while (true) {
+  let hasMore = true;
+
+  while (hasMore) {
+    if (page > BOOKS_CUSTOMER_MAX_PAGES) {
+      throw new Error(
+        `getAllBooksCustomers: exceeded MAX_PAGES=${BOOKS_CUSTOMER_MAX_PAGES} (${BOOKS_CUSTOMER_MAX_PAGES * 200} contacts ceiling)`,
+      );
+    }
     const res = await zohoFetch<BooksContactsPageResponse>("/books/v3/contacts", {
       params: { contact_type: "customer", page: String(page), per_page: "200" },
     });
     all.push(...(res.contacts ?? []));
-    if (!res.page_context?.has_more_page) break;
+    hasMore = res.page_context?.has_more_page ?? false;
     page += 1;
   }
   return all;
+}
+
+export interface BooksCustomFieldPatch {
+  api_name: string;
+  value: string;
 }
 
 export interface BooksContactPatch {
@@ -380,6 +394,7 @@ export interface BooksContactPatch {
   phone?: string;
   notes?: string;
   shipping_address?: Partial<ZohoBooksAddress>;
+  custom_fields?: BooksCustomFieldPatch[];
 }
 
 export async function updateBooksContact(
@@ -390,4 +405,20 @@ export async function updateBooksContact(
     method: "PUT",
     body: patch as unknown as Record<string, unknown>,
   });
+}
+
+interface BooksContactDetailResponse {
+  contact?: ZohoBooksContact;
+}
+
+export async function getBooksContact(
+  contactId: string,
+): Promise<ZohoBooksContact> {
+  const res = await zohoFetch<BooksContactDetailResponse>(
+    `/books/v3/contacts/${contactId}`,
+  );
+  if (!res.contact) {
+    throw new Error(`Books contact ${contactId} not found`);
+  }
+  return res.contact;
 }
