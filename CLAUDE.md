@@ -292,6 +292,13 @@ JSONL append log for outreach performance analysis. Three event types:
 - **Workflow:** Scan card → CRM lead + Sheet + KB → later pull by region → enroll in email sequence
 - **Gotchas:** Zoho rate-limits token refresh after ~10 rapid calls (use batch mode). Sheet uses `RAW` valueInputOption to prevent formula injection. CRM and Sheet writes have separate error handling (Sheet failure won't mask CRM success). `searchLeads` paginates automatically. `buildCriteria` validates/sanitizes inputs against injection.
 
+### cf-state-fill Scripts (`scripts/cf-state-fill/`)
+- `state-codes.ts` — `toStateCode(input, country?)` → 2-letter US state / Canadian province code, with country hint to disambiguate CA
+- `detect.ts` — Lists Books customers missing `cf_state`/`cf_city`, per-contact GET (1s throttle), derives values from `shipping_address` → billing fallback, emits preview JSON+CSV to `data/cf-state-fill/`. No writes.
+- `apply.ts` — Reads approved CSV, backs up current values, PUTs `cf_state`/`cf_city` only (custom_fields patch). `--dry-run` default; `--live` to write. Rejects any non cf_state/cf_city field.
+- `rebucket.ts` — Re-labels buckets + normalizes city casing on existing preview JSON without re-fetching.
+- `count-books-by-state.ts` — Quick diagnostic: counts Books customers by `cf_state` custom field.
+
 ### Reference Files
 - `docs/stock-update-guide-2026-03-04.md` — Full audit: variant IDs, color codes, flags
 - `docs/q-vision-business-plan-summary.md` — English business plan summary
