@@ -29,6 +29,7 @@ export interface SendOptions {
   replyTo?: string;
   threadId?: string;
   inReplyTo?: string;
+  bcc?: string[];
   /** For sent-log: contact name */
   contactName?: string;
   /** For sent-log: contact company */
@@ -89,7 +90,7 @@ export async function sendEmail(options: SendOptions): Promise<SendResult> {
 }
 
 async function sendViaSmtp(options: SendOptions): Promise<SendResult> {
-  const { to, subject, template, vars, replyTo } = options;
+  const { to, subject, template, vars, replyTo, bcc } = options;
 
   const { html, text } = loadTemplate(template, vars, buildUtm(options));
   const subjectRendered = renderString(subject, vars);
@@ -102,6 +103,7 @@ async function sendViaSmtp(options: SendOptions): Promise<SendResult> {
       html,
       text,
       replyTo: replyTo ?? env.EMAIL_FROM_ADDRESS,
+      ...(bcc && bcc.length > 0 ? { bcc } : {}),
     });
 
     return { success: true, messageId: info.messageId };
@@ -112,7 +114,7 @@ async function sendViaSmtp(options: SendOptions): Promise<SendResult> {
 }
 
 async function sendViaGmail(options: SendOptions): Promise<SendResult> {
-  const { to, subject, template, vars, replyTo, threadId, inReplyTo } = options;
+  const { to, subject, template, vars, replyTo, threadId, inReplyTo, bcc } = options;
 
   const { html, text } = loadTemplate(template, vars, buildUtm(options));
   const subjectRendered = renderString(subject, vars);
@@ -127,6 +129,7 @@ async function sendViaGmail(options: SendOptions): Promise<SendResult> {
     replyTo: replyTo ?? env.EMAIL_FROM_ADDRESS,
     threadId,
     inReplyTo,
+    bcc,
   });
 }
 

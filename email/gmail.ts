@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { createTransport } from "nodemailer";
+import { env } from "./env.ts";
 
 const __dir = import.meta.dirname ?? dirname(fileURLToPath(import.meta.url));
 const CREDENTIALS_PATH = join(__dir, "credentials.json");
@@ -103,6 +104,7 @@ export interface GmailSendOptions {
   replyTo?: string;
   threadId?: string;
   inReplyTo?: string;
+  bcc?: string[];
 }
 
 export interface GmailSendResult {
@@ -123,9 +125,11 @@ export async function gmailSend(opts: GmailSendOptions): Promise<GmailSendResult
     replyTo,
     threadId,
     inReplyTo,
+    bcc,
   } = opts;
 
   try {
+    await assertSenderIdentity(fromAddress);
     const gmail = getGmailClient();
 
     // Build RFC 2822 MIME using nodemailer's stream transport
@@ -137,14 +141,15 @@ export async function gmailSend(opts: GmailSendOptions): Promise<GmailSendResult
       headers["References"] = inReplyTo;
     }
 
+    const hasHtmlTags = /<[a-z][\s\S]*>/i.test(html);
     const info = await transport.sendMail({
       from: `"${fromName}" <${fromAddress}>`,
       to,
       subject,
-      html,
-      text,
+      ...(hasHtmlTags ? { html, text } : { text: html }),
       replyTo: replyTo ?? fromAddress,
       headers,
+      ...(bcc && bcc.length > 0 ? { bcc } : {}),
     });
 
     // Read the MIME message from the stream
@@ -218,7 +223,16 @@ export async function verifyGmailConnection(): Promise<boolean> {
   try {
     const gmail = getGmailClient();
     const res = await gmail.users.getProfile({ userId: "me" });
-    console.log(`Gmail connected: ${res.data.emailAddress}`);
+    const actual = res.data.emailAddress ?? "";
+    const expected = env.EMAIL_FROM_ADDRESS;
+    if (actual.toLowerCase() !== expected.toLowerCase()) {
+      console.error(
+        `Gmail SENDER MISMATCH: authenticated as ${actual}, but EMAIL_FROM_ADDRESS=${expected}. ` +
+          `Gmail will rewrite the From header. Re-auth the mailbox you want to send from with "pnpm email:auth".`,
+      );
+      return false;
+    }
+    console.log(`Gmail connected: ${actual} (matches EMAIL_FROM_ADDRESS)`);
     return true;
   } catch (err) {
     console.error(
@@ -227,4 +241,36 @@ export async function verifyGmailConnection(): Promise<boolean> {
     );
     return false;
   }
+}
+
+/**
+ * Asserts the authenticated Gmail mailbox matches the expected sender address.
+ * Result is cached for the lifetime of the process — first call hits the API,
+ * subsequent calls are free.
+ *
+ * Throws if mismatched so every send via `gmailSend` is guarded — no campaign
+ * can accidentally send under the wrong identity.
+ */
+let cachedAuthedAddress: string | null = null;
+export async function assertSenderIdentity(expected: string): Promise<void> {
+  const want = expected.toLowerCase();
+  if (cachedAuthedAddress) {
+    if (cachedAuthedAddress !== want) {
+      throw new Error(
+        `Gmail sender mismatch: authenticated as ${cachedAuthedAddress}, expected ${expected}. ` +
+          `Re-auth with "pnpm email:auth".`,
+      );
+    }
+    return;
+  }
+  const gmail = getGmailClient();
+  const res = await gmail.users.getProfile({ userId: "me" });
+  const actual = (res.data.emailAddress ?? "").toLowerCase();
+  if (actual !== want) {
+    throw new Error(
+      `Gmail sender mismatch: authenticated as ${actual}, expected ${expected}. ` +
+        `Gmail will rewrite the From header. Re-auth with "pnpm email:auth".`,
+    );
+  }
+  cachedAuthedAddress = actual;
 }

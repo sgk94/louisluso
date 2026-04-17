@@ -5,13 +5,14 @@
 import { sendEmail, verifyConnection } from "./send.ts";
 import type { TemplateVars } from "./templates.ts";
 
-function parseArgs(): { to: string; template: string; subject: string; vars: TemplateVars; dryRun: boolean } {
+function parseArgs(): { to: string; template: string; subject: string; vars: TemplateVars; dryRun: boolean; bcc: string[] } {
   const args = process.argv.slice(2);
   let to = "";
   let template = "";
   let subject = "";
   const vars: TemplateVars = {};
   let dryRun = false;
+  const bcc: string[] = [];
 
   for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
@@ -29,6 +30,9 @@ function parseArgs(): { to: string; template: string; subject: string; vars: Tem
         vars[key] = rest.join("=");
         break;
       }
+      case "--bcc":
+        bcc.push(args[++i]);
+        break;
       case "--dry-run":
         dryRun = true;
         break;
@@ -36,17 +40,18 @@ function parseArgs(): { to: string; template: string; subject: string; vars: Tem
   }
 
   if (!to || !template || !subject) {
-    console.error("Usage: npx tsx email/cli-send.ts --to EMAIL --template NAME --subject SUBJECT [--var key=value] [--dry-run]");
+    console.error("Usage: npx tsx email/cli-send.ts --to EMAIL --template NAME --subject SUBJECT [--var key=value] [--bcc EMAIL] [--dry-run]");
     process.exit(1);
   }
 
-  return { to, template, subject, vars, dryRun };
+  return { to, template, subject, vars, dryRun, bcc };
 }
 
 async function main(): Promise<void> {
-  const { to, template, subject, vars, dryRun } = parseArgs();
+  const { to, template, subject, vars, dryRun, bcc } = parseArgs();
 
   console.log(`Sending "${template}" to ${to}`);
+  if (bcc.length > 0) console.log(`BCC: ${bcc.join(", ")}`);
   console.log(`Subject: ${subject}`);
   console.log(`Vars: ${JSON.stringify(vars)}`);
 
@@ -63,7 +68,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const result = await sendEmail({ to, subject, template, vars });
+  const result = await sendEmail({ to, subject, template, vars, bcc: bcc.length > 0 ? bcc : undefined });
   if (result.success) {
     console.log(`Sent! Message ID: ${result.messageId}`);
   } else {
