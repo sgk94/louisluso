@@ -433,3 +433,11 @@ export async function getBooksContact(
   }
   return res.contact;
 }
+
+export async function deleteBooksContact(contactId: string): Promise<void> {
+  const parsed = zohoIdSchema.safeParse(contactId);
+  if (!parsed.success) {
+    throw new Error("Invalid contact ID");
+  }
+  await zohoFetch(`/books/v3/contacts/${parsed.data}`, { method: "DELETE" });
+}
