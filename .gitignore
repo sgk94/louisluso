@@ -9,6 +9,7 @@ email/send-log.json
 email/sent-log.jsonl
 email/credentials.json
 email/token.json
+email/token.*.json
 .env.local
 .vercel
 
@@ -23,6 +24,16 @@ data/location-kb.json
 
 # cf-state-fill run artifacts (preview, backup, apply log)
 data/cf-state-fill/
+
+# Zoho Books contact deletes — backup snapshots + logs
+data/deletes/
+
+# Email campaign checklists (contain customer emails)
+data/email-campaign/
+
+# macOS artifacts
+.DS_Store
+**/.DS_Store
 
 # Build artifacts
 tsconfig.tsbuildinfo
