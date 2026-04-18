@@ -2,6 +2,47 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+---
+
+## Progress checkpoint — paused 2026-04-18 (resume at T10)
+
+**Completed (commits on `main`):**
+
+| Task | Commit(s) | Notes |
+|---|---|---|
+| T1 — workflow profile module | `c731967` + `445c0c7` (review fix: never-guards + hoist findIndex) | 18/18 tests |
+| T2 — workflowProfile on PartnerMetadata | `09544ed` | 5/5 new + 5/5 existing |
+| T3 — rateLimitOrderDetail | `3515bd7` | Fixed `vi.mock` hoisting bug in plan template using `vi.hoisted()` (matches repo convention) |
+| T4 — zohoFetch tier-1 instrumentation | `db0cf66` | 2/2 new + 71/71 Zoho suite |
+| T5 — getSalesOrderByReference + getInvoiceForSalesOrder | `99ec4da` + `26e1f0e` (review fix: zohoIdSchema validation + invoice sort_column) | 4/4 new |
+| T6 — getOrderLifecycle orchestrator | `b4dbf15` | 8/8 lifecycle tests; graceful degrade verified |
+| T7 — customer-isolation regression test | `c9f8816` | Pure pin of existing behavior; 1/1 pass with no production code change |
+| T8 — getCachedOrderLifecycle wrapper | `25a9741` | 252/252 lib + zoho suites still passing |
+| T9 — StatusTracker component | `f502857` | 5/5 component tests; review skipped at pause request |
+
+**Next session resumes at T10.** Outstanding tasks:
+
+| Task | What it does |
+|---|---|
+| **T10** — `OrderDetail` component | Layout wrapper: header → tracker → conditional invoice → conditional shipping → line items → actions → recovery footer |
+| T11 — detail page (`page.tsx`) + `error.tsx` | Server Component (auth + rate limit + lifecycle fetch + render) and page-level error boundary |
+| T12 — quote-fallback (schema + API + page) | Tier-2 no-auth fallback at `/quote-fallback` posting to Gmail |
+| T13 — webhook stub `/api/webhooks/zoho` | Logs payload + 200; real handlers in 5e |
+| T14 — success page → redirect | Slim `app/portal/quote/success/[estimateNumber]/page.tsx` to redirect to canonical detail URL |
+| T15 — submit handler client redirect | One-line change in `app/portal/quote/page.tsx`: redirect to new canonical URL |
+| T16 — QuotesTable row → Link | Wrap Quote # cell in Link to detail page |
+| T17 — final sweep | `pnpm test` + `pnpm tsc --noEmit` + manual smoke + `git tag phase-5d.2-complete` + push |
+
+**Resume instructions for the next session:**
+1. Pull latest `main` (all T1-T9 work is already pushed).
+2. Re-read this plan from the `## Task 10` heading downward.
+3. Optional: re-review T9 (`f502857`) before starting T10 if anything looks off in the StatusTracker UI when you preview it.
+4. Continue with the same subagent-driven pattern (implementer → spec review → code quality review → fixes → next task), or switch to inline executing-plans if preferred.
+
+**Test discipline (still load-bearing):** failing test = fix code, not the test. Only update assertions when the asserted behavior is genuinely obsolete due to a deliberate, reviewed code change.
+
+---
+
 **Goal:** Build the canonical order-detail page at `/portal/quotes/[estimateNumber]` with a 5-stage lifecycle tracker, conditional invoice/shipping sections, two workflow profiles (cash + net30), and an always-on three-tier fallback chain so a buyer can never get stuck.
 
 **Architecture:** Server-rendered Next.js App Router page hits a new `getOrderLifecycle(customerId, estimateNumber)` orchestrator that fetches estimate + linked sales order + invoice + shipment from Zoho Books in a single render. A pure `computeStages(profile, lifecycle)` helper turns Zoho state into ordered tracker stages per the partner's `workflowProfile` ("cash" or "net30"). Stage-tiered cache TTL (60s in-flight / 15min terminal) plus per-user rate limiting protect Zoho quota. Errors never strand the buyer — every failure path renders recovery affordances and the always-on `/quote-fallback` form.
