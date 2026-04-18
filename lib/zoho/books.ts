@@ -441,3 +441,118 @@ export async function deleteBooksContact(contactId: string): Promise<void> {
   }
   await zohoFetch(`/books/v3/contacts/${parsed.data}`, { method: "DELETE" });
 }
+
+// --- Phase 5d.2 additions: order-lifecycle helpers ---
+
+const packageSchema = z.object({
+  package_id: z.string(),
+  package_number: z.string().optional(),
+  tracking_number: z.string().optional(),
+  delivery_method: z.string().optional(),
+  shipment_date: z.string().optional(),
+  status: z.string().optional(),
+});
+
+const salesOrderDetailSchema = z.object({
+  salesorder_id: z.string(),
+  salesorder_number: z.string(),
+  customer_id: z.string(),
+  customer_name: z.string(),
+  status: z.string(),
+  total: z.number(),
+  date: z.string(),
+  created_time: z.string(),
+  line_items: z.array(z.unknown()),
+  packages: z.array(packageSchema).default([]),
+});
+
+export type ZohoSalesOrderDetail = z.infer<typeof salesOrderDetailSchema>;
+
+const salesOrderSearchSchema = z.object({
+  salesorders: z.array(
+    z.object({
+      salesorder_id: z.string(),
+      reference_number: z.string().optional(),
+    }),
+  ),
+});
+
+export async function getSalesOrderByReference(
+  customerId: string,
+  estimateNumber: string,
+): Promise<ZohoSalesOrderDetail | null> {
+  const search = await zohoFetch<unknown>("/books/v3/salesorders", {
+    params: { customer_id: customerId, reference_number: estimateNumber },
+  });
+  const parsedSearch = salesOrderSearchSchema.safeParse(search);
+  if (!parsedSearch.success) {
+    console.error(
+      "getSalesOrderByReference: search parse failed",
+      parsedSearch.error.flatten(),
+    );
+    return null;
+  }
+  const match = parsedSearch.data.salesorders.find(
+    (so) => so.reference_number === estimateNumber,
+  );
+  if (!match) return null;
+
+  const detailRes = await zohoFetch<unknown>(
+    `/books/v3/salesorders/${match.salesorder_id}`,
+  );
+  const parsedDetail = z
+    .object({ salesorder: salesOrderDetailSchema })
+    .safeParse(detailRes);
+  if (!parsedDetail.success) {
+    console.error(
+      "getSalesOrderByReference: detail parse failed",
+      parsedDetail.error.flatten(),
+    );
+    return null;
+  }
+  if (parsedDetail.data.salesorder.customer_id !== customerId) return null;
+  return parsedDetail.data.salesorder;
+}
+
+const invoiceListItemSchema = z.object({
+  invoice_id: z.string(),
+  invoice_number: z.string(),
+  status: z.enum([
+    "draft",
+    "sent",
+    "viewed",
+    "partially_paid",
+    "paid",
+    "overdue",
+    "void",
+  ]),
+  total: z.number(),
+  balance: z.number(),
+  date: z.string(),
+  due_date: z.string().optional(),
+  last_payment_date: z.string().nullable().optional(),
+});
+
+export type ZohoInvoiceForOrder = z.infer<typeof invoiceListItemSchema>;
+
+const invoicesListSchema = z.object({
+  invoices: z.array(invoiceListItemSchema),
+});
+
+export async function getInvoiceForSalesOrder(
+  salesOrderId: string,
+): Promise<ZohoInvoiceForOrder | null> {
+  const res = await zohoFetch<unknown>("/books/v3/invoices", {
+    params: { salesorder_id: salesOrderId },
+  });
+  const parsed = invoicesListSchema.safeParse(res);
+  if (!parsed.success) {
+    console.error(
+      "getInvoiceForSalesOrder: parse failed",
+      parsed.error.flatten(),
+    );
+    return null;
+  }
+  if (parsed.data.invoices.length === 0) return null;
+  return parsed.data.invoices[0];
+}
