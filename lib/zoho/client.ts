@@ -42,7 +42,34 @@ export async function zohoFetch<T = unknown>(
     body = JSON.stringify(options.body);
   }
 
-  const response = await fetch(url.toString(), { method, headers, body });
+  const startedAt = Date.now();
+  let response: Response;
+  try {
+    response = await fetch(url.toString(), { method, headers, body });
+  } catch (err) {
+    console.info(
+      JSON.stringify({
+        tag: "zoho_call",
+        method,
+        endpoint: path,
+        status: 0,
+        ms: Date.now() - startedAt,
+        error: err instanceof Error ? err.message : String(err),
+      }),
+    );
+    throw err;
+  }
+
+  const ms = Date.now() - startedAt;
+  console.info(
+    JSON.stringify({
+      tag: "zoho_call",
+      method,
+      endpoint: path,
+      status: response.status,
+      ms,
+    }),
+  );
 
   if (!response.ok) {
     const errorBody = await response.text();
