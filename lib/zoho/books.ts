@@ -575,3 +575,60 @@ export async function getInvoiceForSalesOrder(
   if (parsed.data.invoices.length === 0) return null;
   return parsed.data.invoices[0];
 }
+
+export interface OrderShipment {
+  tracking_number: string;
+  carrier: string;
+  date: string;
+}
+
+export interface OrderLifecycle {
+  estimate: ZohoEstimateDetail;
+  salesOrder: ZohoSalesOrderDetail | null;
+  invoice: ZohoInvoiceForOrder | null;
+  shipment: OrderShipment | null;
+}
+
+function pickShipment(so: ZohoSalesOrderDetail | null): OrderShipment | null {
+  if (!so) return null;
+  const withTracking = so.packages.find(
+    (p) => p.tracking_number && p.shipment_date,
+  );
+  if (!withTracking) return null;
+  return {
+    tracking_number: withTracking.tracking_number ?? "",
+    carrier: withTracking.delivery_method ?? "",
+    date: withTracking.shipment_date ?? "",
+  };
+}
+
+export async function getOrderLifecycle(
+  customerId: string,
+  estimateNumber: string,
+): Promise<OrderLifecycle | null> {
+  const estimate = await getEstimateByNumber(customerId, estimateNumber);
+  if (!estimate) return null;
+
+  let salesOrder: ZohoSalesOrderDetail | null = null;
+  try {
+    salesOrder = await getSalesOrderByReference(customerId, estimateNumber);
+  } catch (err) {
+    console.error("getOrderLifecycle: salesOrder fetch failed", err);
+  }
+
+  let invoice: ZohoInvoiceForOrder | null = null;
+  if (salesOrder) {
+    try {
+      invoice = await getInvoiceForSalesOrder(salesOrder.salesorder_id);
+    } catch (err) {
+      console.error("getOrderLifecycle: invoice fetch failed", err);
+    }
+  }
+
+  return {
+    estimate,
+    salesOrder,
+    invoice,
+    shipment: pickShipment(salesOrder),
+  };
+}
