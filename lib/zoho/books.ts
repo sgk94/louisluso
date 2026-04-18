@@ -632,3 +632,30 @@ export async function getOrderLifecycle(
     shipment: pickShipment(salesOrder),
   };
 }
+
+export const ORDER_LIFECYCLE_CACHE_TAG_PREFIX = "order-lifecycle";
+
+export function orderLifecycleTag(
+  customerId: string,
+  estimateNumber: string,
+): string {
+  return `${ORDER_LIFECYCLE_CACHE_TAG_PREFIX}:${customerId}:${estimateNumber}`;
+}
+
+// Cached wrapper. TTL is 60s by default; the future Zoho webhook handler
+// (5e) will call revalidateTag(orderLifecycleTag(...)) to invalidate per-order
+// on lifecycle events. We don't bake stage-aware TTL into the cache key
+// because that would defeat caching.
+export function getCachedOrderLifecycle(
+  customerId: string,
+  estimateNumber: string,
+): Promise<OrderLifecycle | null> {
+  return unstable_cache(
+    async () => getOrderLifecycle(customerId, estimateNumber),
+    ["order-lifecycle", customerId, estimateNumber],
+    {
+      tags: [orderLifecycleTag(customerId, estimateNumber)],
+      revalidate: 60,
+    },
+  )();
+}
