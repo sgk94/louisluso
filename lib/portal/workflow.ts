@@ -83,6 +83,10 @@ function isStageDone(id: StageId, data: LifecycleData): boolean {
       return data.invoice?.status === "paid";
     case "shipped":
       return Boolean(data.shipment?.tracking_number);
+    default: {
+      const _exhaustive: never = id;
+      return false;
+    }
   }
 }
 
@@ -98,6 +102,10 @@ function stageDate(id: StageId, data: LifecycleData): string | undefined {
       return data.invoice?.last_payment_date ?? undefined;
     case "shipped":
       return data.shipment?.date;
+    default: {
+      const _exhaustive: never = id;
+      return undefined;
+    }
   }
 }
 
@@ -109,6 +117,8 @@ export function computeStages(profile: WorkflowProfile, data: LifecycleData): St
       : data.estimate.status === "expired"
         ? "expired"
         : null;
+
+  const firstPendingIdx = profile.stages.findIndex((sid) => !isStageDone(sid, data));
 
   return profile.stages.map((id, idx): StageState => {
     if (id === "submitted") {
@@ -125,8 +135,6 @@ export function computeStages(profile: WorkflowProfile, data: LifecycleData): St
     if (done) {
       return { id, label: STAGE_LABELS[id], status: "done", date: stageDate(id, data) };
     }
-    // First non-done stage = current. Subsequent = pending.
-    const firstPendingIdx = profile.stages.findIndex((sid) => !isStageDone(sid, data));
     return {
       id,
       label: STAGE_LABELS[id],
