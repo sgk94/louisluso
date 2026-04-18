@@ -5,6 +5,7 @@ export const partnerMetadataSchema = z.object({
   zohoContactId: z.string().min(1),
   company: z.string().min(1),
   pricingPlanId: z.string().optional(),
+  workflowProfile: z.enum(["cash", "net30"]).optional(),
 });
 
 export type PartnerMetadata = z.infer<typeof partnerMetadataSchema>;
