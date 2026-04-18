@@ -497,8 +497,17 @@ export async function getSalesOrderByReference(
   );
   if (!match) return null;
 
+  const idValidation = zohoIdSchema.safeParse(match.salesorder_id);
+  if (!idValidation.success) {
+    console.error(
+      "getSalesOrderByReference: invalid salesorder_id",
+      match.salesorder_id,
+    );
+    return null;
+  }
+
   const detailRes = await zohoFetch<unknown>(
-    `/books/v3/salesorders/${match.salesorder_id}`,
+    `/books/v3/salesorders/${idValidation.data}`,
   );
   const parsedDetail = z
     .object({ salesorder: salesOrderDetailSchema })
@@ -542,8 +551,18 @@ const invoicesListSchema = z.object({
 export async function getInvoiceForSalesOrder(
   salesOrderId: string,
 ): Promise<ZohoInvoiceForOrder | null> {
+  const idValidation = zohoIdSchema.safeParse(salesOrderId);
+  if (!idValidation.success) {
+    console.error("getInvoiceForSalesOrder: invalid salesOrderId", salesOrderId);
+    return null;
+  }
+
   const res = await zohoFetch<unknown>("/books/v3/invoices", {
-    params: { salesorder_id: salesOrderId },
+    params: {
+      salesorder_id: idValidation.data,
+      sort_column: "created_time",
+      sort_order: "D",
+    },
   });
   const parsed = invoicesListSchema.safeParse(res);
   if (!parsed.success) {
