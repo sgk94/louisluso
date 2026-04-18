@@ -223,7 +223,7 @@ Restocked 19 variants across 5 products (300 total units) via WooCommerce REST A
 - **Sent log:** Every sent email is logged to `email/sent-log.jsonl` with full rendered body text + metadata
 
 ### Email Gotchas
-- **Gmail API rewrites the `From` header** to the authenticated mailbox unless the desired address is a verified "Send-as" alias on that mailbox. Setting `from: "Ken Yoon" <cs@…>"` in MIME doesn't override this. **Fix:** OAuth as the actual sending mailbox (`pnpm email:auth` then pick the right Google account at the consent screen). Verified by `getProfile({userId:"me"}).emailAddress`.
+- **Gmail API rewrites the `From` header** to the authenticated mailbox unless the desired address is a verified "Send-as" alias on that mailbox. Setting `from: "Ken Yoon" <cs@…>"` in MIME doesn't override this. **Fix:** OAuth as the actual sending mailbox (`pnpm email:auth` then pick the right Google account at the consent screen). Verified by `getProfile({userId:"me"}).emailAddress`. **Enforcement:** `gmailSend` calls `assertSenderIdentity(EMAIL_FROM_ADDRESS)` before every send and throws on mismatch — this bug cannot recur silently.
 - **Token auth identity (current):** `cs@louisluso.com`. Prior token (`shawn@`) backed up as `email/token.shawn.backup.json` (gitignored).
 - **Deliverability (RESOLVED 2026-04-17):** SPF + DKIM + DMARC all live and verified; canary scored 10/10 on mail-tester from cs@. **DKIM gotcha**: Route 53 originally split the long DKIM key into TWO separate TXT records at `google._domainkey`; receivers couldn't reconstruct → "not verified" in Workspace admin. Fix is ONE TXT record with both quoted strings on a single line separated by a space. Verify with `dig TXT google._domainkey.louisluso.com @8.8.8.8` — must show `ANSWER: 1`. Setup steps for re-creation are in `docs/email-campaigns/deliverability-setup.md`.
 
@@ -253,13 +253,13 @@ JSONL append log for outreach performance analysis. Three event types:
 - `email/cli-sequence.ts` — Run sequences / status / tag replies / log stages / report. `pnpm email:sequence -- run|status|reply|tag|stage|report --sequence NAME [--dry-run]`
 - `email/cli-auth.ts` — One-time Gmail OAuth2 setup. `pnpm email:auth`
 - `email/campaigns/new-collection-blast.ts` — One-off marketing blast. `pnpm email:blast`
-- `email/campaigns/checklist-runner.ts` — Generic per-trip campaign runner. Reads markdown checklist (`data/email-campaign/<trip>.md`), sends every unchecked row, flips `[ ]` → `[x]` on success / `[!]` on error (idempotent). 30s base + 15s jitter delay between sends. BCC=`shawn@`,`admin@`,`cs@`. `npx tsx -r dotenv/config email/campaigns/checklist-runner.ts <path> [--live]`
+- `email/campaigns/checklist-runner.ts` — Generic per-trip campaign runner. Reads markdown checklist (`data/email-campaign/<trip>.md`), sends every unchecked row, flips `[ ]` → `[x]` on success / `[!]` on error (idempotent). 30s base + 15s jitter delay between sends. No BCC (Shawn + Ken both have cs@ access). Runs `verifyConnection` (identity check) before send loop in both live AND dry-run — aborts hard if auth'd mailbox ≠ `EMAIL_FROM_ADDRESS`. `npx tsx -r dotenv/config email/campaigns/checklist-runner.ts <path> [--live]`
 - `email/campaigns/ga-first-touch.ts` — One-off GA first-touch campaign (Apr 17, 4 contacts; superseded by checklist-runner)
 
 ### Email Core Modules
 - `email/env.ts` — Zod-validated env vars with conditional SMTP/Gmail validation
 - `email/send.ts` — Transport dispatch (smtp vs gmail), auto-logs to sent-log.jsonl on success
-- `email/gmail.ts` — Gmail API client: OAuth2 auth, send, reply detection, connection verify, Google Drive access
+- `email/gmail.ts` — Gmail API client: OAuth2 auth, send w/ sender-identity assertion, reply detection, connection verify (+ mismatch check), Google Drive access
 - `email/sequences.ts` — Sequence runner: enrollment, state machine, delay logic, reply detection, outcome logging
 - `email/templates.ts` — Template loading and rendering
 - `email/contacts.ts` — Contact directory (import, lookup, tag-based filtering)
@@ -329,7 +329,7 @@ Active Books customers, filtered + manually verified per trip. Full lists in `do
 
 **Style rules** (per Shawn): no em-dashes / en-dashes (AI tell). Hyphens OK. No pricing in first-touch. `"Hello"` for generic inboxes; `"Hi {name}"` for personal. Outlier cities (Perry GA, Palm Desert) get `"your area"` instead of metro name.
 
-**Status (2026-04-17):** All 66 trip emails went out 2026-04-17 01:00-04:59 UTC under broken sender state — `From: shawn@louisluso.com` (Gmail rewrote; Reply-To was correctly cs@) and without a valid DKIM signature for louisluso.com (Route 53 had two split TXT records, neither parseable). SPF passed throughout, DMARC was `p=none` (monitor-only, no rejection). Token re-authed cs@ at 15:07 UTC; DKIM fixed and verified ~16:00 UTC; canary 10/10. Shawn's call 2026-04-17: let the shawn@ sends ride — same domain, Reply-To was correct, no clarifying follow-up needed. Tally: GA 3 sent / 11 already-contacted / 4 skipped; SF 7/4/1; Houston 25/0/3 + 1 inactive; LV 11/0/0; LA 20/1/4. Reply tally: 8 total (7 substantive in cs@, 1 OOO in shawn@) = ~10.6% reply rate.
+**Status (2026-04-17):** All 66 trip emails went out 2026-04-17 01:00-04:59 UTC under broken sender state — `From: shawn@louisluso.com` (Gmail rewrote; Reply-To was correctly cs@) and without a valid DKIM signature for louisluso.com (Route 53 had two split TXT records, neither parseable). SPF passed throughout, DMARC was `p=none` (monitor-only, no rejection). Token re-authed cs@ at 15:07 UTC; DKIM fixed and verified ~16:00 UTC; canary 10/10. Shawn's call 2026-04-17: let the shawn@ sends ride — same domain, Reply-To was correct, no clarifying follow-up needed. Tally: GA 3 sent / 11 already-contacted / 4 skipped; SF 7/4/1; Houston 25/0/3 + 1 inactive; LV 11/0/0; LA 20/1/4. Reply tally (last checked 2026-04-17 PM): 10 total (9 substantive in cs@, 1 OOO from XP Health in shawn@) = ~15.2% reply rate. Closures confirmed + marked inactive in Zoho Books: The Sharper Vision, Sharper Vision/Eyecare Partners, Lakeside Optical. 3 hot leads (Optica Vision Superior; Eye District Express → Wed May 6; Glacier Optical → Apr 28 @ 3pm at 9889 Bellaire Blvd Unit 252 Houston); 3 defer leads (TSO Sugar Land → June, Eye Q Optometry → post-May 10, Mimi Optometric → "I will reach out to you"). Reply checking: cs@ inbox only covers replies that honored Reply-To; auto-responders (OOO) hit From, so they sit in shawn@'s inbox — swap token temporarily via `email/token.shawn.backup.json` to check.
 
 ### cf-state-fill Scripts (`scripts/cf-state-fill/`)
 - `state-codes.ts` — `toStateCode(input, country?)` → 2-letter US state / Canadian province code, with country hint to disambiguate CA
