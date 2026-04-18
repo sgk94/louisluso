@@ -64,6 +64,19 @@ export async function rateLimitQuotesList(
   return { success, remaining };
 }
 
+const orderDetailLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(60, "5 m"),
+  prefix: "louisluso:order-detail",
+});
+
+export async function rateLimitOrderDetail(
+  identifier: string
+): Promise<RateLimitResult> {
+  const { success, remaining } = await orderDetailLimiter.limit(identifier);
+  return { success, remaining };
+}
+
 const zohoWebhookLimiter = new Ratelimit({
   redis,
   limiter: Ratelimit.slidingWindow(20, "5 m"),
