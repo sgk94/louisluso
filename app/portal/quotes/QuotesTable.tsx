@@ -57,7 +57,14 @@ export function QuotesTable({
             const label = partnerLabelForEstimateStatus(e.status);
             return (
               <tr key={e.estimate_id} className="border-b border-white/5">
-                <td className="py-3 text-gray-200">{e.estimate_number}</td>
+                <td className="py-3 text-gray-200">
+                  <Link
+                    href={`/portal/quotes/${encodeURIComponent(e.estimate_number)}`}
+                    className="hover:text-bronze"
+                  >
+                    {e.estimate_number}
+                  </Link>
+                </td>
                 <td className="py-3 text-gray-400">{formatDate(e.date)}</td>
                 <td className="py-3">
                   <span

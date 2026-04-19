@@ -88,3 +88,26 @@ describe("QuotesTable", () => {
     expect(screen.queryByText(/Next/)).not.toBeInTheDocument();
   });
 });
+
+describe("QuotesTable — row link to detail", () => {
+  it("renders each Quote # cell as a Link to /portal/quotes/[number]", () => {
+    render(
+      <QuotesTable
+        estimates={[
+          {
+            estimate_id: "est_1",
+            estimate_number: "EST-001",
+            date: "2026-04-18",
+            status: "sent",
+            total: 100,
+            currency_code: "USD",
+          },
+        ]}
+        page={1}
+        hasMore={false}
+      />,
+    );
+    const link = screen.getByRole("link", { name: "EST-001" });
+    expect(link).toHaveAttribute("href", "/portal/quotes/EST-001");
+  });
+});
