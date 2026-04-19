@@ -39,7 +39,7 @@ export default function QuotePage(): React.ReactElement {
 
       clear();
       router.push(
-        `/portal/quote/success/${encodeURIComponent(data.estimateNumber)}`,
+        `/portal/quotes/${encodeURIComponent(data.estimateNumber)}`,
       );
     } catch {
       setError("Unable to submit quote. Please try again.");
