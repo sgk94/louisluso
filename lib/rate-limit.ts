@@ -89,3 +89,16 @@ export async function rateLimitZohoWebhook(
   const { success, remaining } = await zohoWebhookLimiter.limit(identifier);
   return { success, remaining };
 }
+
+const quoteFallbackLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(5, "60 s"),
+  prefix: "louisluso:quote-fallback",
+});
+
+export async function rateLimitQuoteFallback(
+  identifier: string,
+): Promise<RateLimitResult> {
+  const { success, remaining } = await quoteFallbackLimiter.limit(identifier);
+  return { success, remaining };
+}

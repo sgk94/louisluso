@@ -30,4 +30,31 @@ describe("quoteFallbackSchema", () => {
   it("rejects empty product list", () => {
     expect(quoteFallbackSchema.safeParse({ ...valid, products: "" }).success).toBe(false);
   });
+
+  it("rejects CRLF in company (header injection guard)", () => {
+    expect(
+      quoteFallbackSchema.safeParse({
+        ...valid,
+        company: "Acme\r\nBcc: attacker@example.com",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects CRLF in name and phone (header injection guard)", () => {
+    expect(
+      quoteFallbackSchema.safeParse({ ...valid, name: "Alice\nX-Evil: 1" }).success,
+    ).toBe(false);
+    expect(
+      quoteFallbackSchema.safeParse({ ...valid, phone: "555\r\nX-Evil: 1" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects products/notes exceeding length caps", () => {
+    expect(
+      quoteFallbackSchema.safeParse({ ...valid, products: "x".repeat(5001) }).success,
+    ).toBe(false);
+    expect(
+      quoteFallbackSchema.safeParse({ ...valid, notes: "x".repeat(2001) }).success,
+    ).toBe(false);
+  });
 });

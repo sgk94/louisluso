@@ -1,9 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { sendEmailMock } = vi.hoisted(() => ({
+const { rateLimitQuoteFallbackMock, sendEmailMock } = vi.hoisted(() => ({
+  rateLimitQuoteFallbackMock: vi.fn().mockResolvedValue({ success: true, remaining: 4 }),
   sendEmailMock: vi.fn().mockResolvedValue(undefined),
 }));
+
+vi.mock("@/lib/rate-limit", () => ({ rateLimitQuoteFallback: rateLimitQuoteFallbackMock }));
 vi.mock("@/lib/gmail", () => ({ sendEmail: sendEmailMock }));
+vi.mock("next/headers", () => ({
+  headers: vi.fn().mockResolvedValue({
+    get: () => "127.0.0.1",
+  }),
+}));
 
 import { POST } from "@/app/api/quote-fallback/route";
 
@@ -16,7 +24,11 @@ function makeRequest(body: unknown): Request {
 }
 
 describe("POST /api/quote-fallback", () => {
-  beforeEach(() => sendEmailMock.mockClear());
+  beforeEach(() => {
+    sendEmailMock.mockClear();
+    rateLimitQuoteFallbackMock.mockClear();
+    rateLimitQuoteFallbackMock.mockResolvedValue({ success: true, remaining: 4 });
+  });
 
   const valid = {
     email: "p@acme.com",
@@ -57,5 +69,19 @@ describe("POST /api/quote-fallback", () => {
     sendEmailMock.mockRejectedValueOnce(new Error("gmail down"));
     const res = await POST(makeRequest(valid));
     expect(res.status).toBe(500);
+  });
+
+  it("returns 429 when rate limited", async () => {
+    rateLimitQuoteFallbackMock.mockResolvedValueOnce({ success: false, remaining: 0 });
+    const res = await POST(makeRequest(valid));
+    expect(res.status).toBe(429);
+  });
+
+  it("returns 400 on CRLF injection attempt in company", async () => {
+    const res = await POST(makeRequest({
+      ...valid,
+      company: "Acme\r\nBcc: attacker@example.com",
+    }));
+    expect(res.status).toBe(400);
   });
 });

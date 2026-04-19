@@ -1,8 +1,17 @@
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
 import { sendEmail } from "@/lib/gmail";
 import { quoteFallbackSchema } from "@/lib/schemas/quote-fallback";
+import { rateLimitQuoteFallback } from "@/lib/rate-limit";
 
 export async function POST(request: Request): Promise<NextResponse> {
+  const headerList = await headers();
+  const ip = headerList.get("x-forwarded-for")?.split(",")[0] ?? "anonymous";
+  const { success: rateLimitOk } = await rateLimitQuoteFallback(ip);
+  if (!rateLimitOk) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   let body: unknown;
   try {
     body = await request.json();
