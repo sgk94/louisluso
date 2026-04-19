@@ -176,7 +176,7 @@ export function OrderDetail({
           </a>{" "}
           or{" "}
           <Link href="/quote-fallback" className="text-bronze hover:underline">
-            Submit a quote without logging in
+            submit a quote without logging in
           </Link>
           . Reference: <code className="text-gray-400">{errorId}</code>
         </footer>

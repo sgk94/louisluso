@@ -108,6 +108,6 @@ describe("OrderDetail", () => {
       />,
     );
     expect(screen.getByText(/req_abc123/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Submit a quote without logging in/ })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /submit a quote without logging in/i })).toBeInTheDocument();
   });
 });
