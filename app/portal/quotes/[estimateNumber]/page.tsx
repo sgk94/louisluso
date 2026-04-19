@@ -2,7 +2,7 @@ import Link from "next/link";
 import { currentUser } from "@clerk/nextjs/server";
 import { isPartner } from "@/lib/portal/types";
 import { rateLimitOrderDetail } from "@/lib/rate-limit";
-import { getCachedOrderLifecycle } from "@/lib/zoho/books";
+import { getCachedOrderLifecycle, type OrderLifecycle } from "@/lib/zoho/books";
 import { getProfile } from "@/lib/portal/workflow";
 import { OrderDetail } from "./OrderDetail";
 
@@ -42,7 +42,7 @@ export default async function OrderDetailPage({
 
   const { estimateNumber } = await params;
 
-  let lifecycle;
+  let lifecycle: OrderLifecycle | null;
   try {
     lifecycle = await getCachedOrderLifecycle(meta.zohoContactId, estimateNumber);
   } catch (err) {

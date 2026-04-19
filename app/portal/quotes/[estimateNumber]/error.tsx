@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { useEffect } from "react";
 
 export default function ErrorBoundary({
   error,
@@ -8,6 +9,10 @@ export default function ErrorBoundary({
   error: Error & { digest?: string };
   reset: () => void;
 }): React.ReactElement {
+  useEffect(() => {
+    console.error("OrderDetailPage error boundary", error);
+  }, [error]);
+
   return (
     <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#0a0a0a] px-4">
       <div className="max-w-md text-center">
