@@ -17,6 +17,7 @@ interface Props {
   profile: WorkflowProfile;
   errorId: string;
   zohoInvoiceUrl?: string; // optional, real URL filled in by 5d.3
+  zohoInvoicePdfUrl?: string; // NEW — filled in by 5d.3
 }
 
 const CARRIER_TRACKING_URLS: Record<string, (n: string) => string> = {
@@ -27,10 +28,10 @@ const CARRIER_TRACKING_URLS: Record<string, (n: string) => string> = {
 };
 
 function trackingUrl(carrier: string, tracking: string): string {
-  const fn =
-    CARRIER_TRACKING_URLS[carrier] ??
-    ((n: string) => `https://www.google.com/search?q=${encodeURIComponent(`${carrier} ${n}`)}`);
-  return fn(tracking);
+  const fn = CARRIER_TRACKING_URLS[carrier];
+  if (fn) return fn(tracking);
+  const query = carrier ? `${carrier} ${tracking}` : tracking;
+  return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
 }
 
 export function OrderDetail({
@@ -41,6 +42,7 @@ export function OrderDetail({
   profile,
   errorId,
   zohoInvoiceUrl,
+  zohoInvoicePdfUrl,
 }: Props): React.ReactElement {
   const stages = computeStages(profile, {
     estimate: { date: estimate.date, status: estimate.status },
@@ -75,7 +77,9 @@ export function OrderDetail({
               {invoice.due_date ? ` • Due: ${invoice.due_date}` : ""}
             </p>
             {invoice.status === "paid" ? (
-              <p className="mt-3 text-sm text-bronze">✓ Paid {invoice.last_payment_date ?? ""}</p>
+              <p className="mt-3 text-sm text-bronze">
+                ✓ Paid{invoice.last_payment_date ? ` ${invoice.last_payment_date}` : ""}
+              </p>
             ) : (
               <div className="mt-4 flex flex-wrap gap-3">
                 {zohoInvoiceUrl && (
@@ -88,14 +92,16 @@ export function OrderDetail({
                     Pay Invoice
                   </a>
                 )}
-                <a
-                  href={`https://books.zoho.com/app/invoices/${invoice.invoice_id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="border border-white/15 px-4 py-2 text-xs uppercase tracking-[2px] text-gray-300 hover:border-white/30"
-                >
-                  Download PDF
-                </a>
+                {zohoInvoicePdfUrl && (
+                  <a
+                    href={zohoInvoicePdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="border border-white/15 px-4 py-2 text-xs uppercase tracking-[2px] text-gray-300 hover:border-white/30"
+                  >
+                    Download PDF
+                  </a>
+                )}
               </div>
             )}
           </section>
@@ -105,7 +111,8 @@ export function OrderDetail({
           <section className="mt-10 border-t border-white/10 pt-6">
             <h2 className="font-heading text-lg text-white">Shipped {shipment.date}</h2>
             <p className="mt-2 text-sm text-gray-400">
-              Tracking: {shipment.tracking_number} ({shipment.carrier})
+              Tracking: {shipment.tracking_number}
+              {shipment.carrier && ` (${shipment.carrier})`}
             </p>
             <a
               href={trackingUrl(shipment.carrier, shipment.tracking_number)}

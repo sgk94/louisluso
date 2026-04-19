@@ -57,7 +57,8 @@ describe("OrderDetail", () => {
         shipment={null}
         profile={WORKFLOW_PROFILES.cash}
         errorId="req_xyz"
-        zohoInvoiceUrl="https://books.zoho.com/pay/inv_1"
+        zohoInvoiceUrl="https://books.zoho.com/pay/abc"
+        zohoInvoicePdfUrl="https://books.zoho.com/pdf/abc"
       />,
     );
     expect(screen.getByText(/INV-1/)).toBeInTheDocument();
@@ -94,6 +95,22 @@ describe("OrderDetail", () => {
     expect(screen.getByText(/Tracking/)).toBeInTheDocument();
     expect(screen.getByText(/1Z999AA10123456784/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Track Package/ })).toBeInTheDocument();
+  });
+
+  it("falls back to a Google search URL when carrier is unknown or empty", () => {
+    render(
+      <OrderDetail
+        estimate={{ ...baseEstimate, status: "accepted" }}
+        salesOrder={{ salesorder_id: "so_1", salesorder_number: "SO-1", customer_id: "cust_1", customer_name: "Acme", status: "confirmed", total: 432.5, line_items: [], date: "2026-04-19", created_time: "2026-04-19T10:00:00Z", packages: [] }}
+        invoice={null}
+        shipment={{ tracking_number: "XYZ123", carrier: "", date: "2026-04-24" }}
+        profile={WORKFLOW_PROFILES.cash}
+        errorId="req_xyz"
+      />,
+    );
+    const link = screen.getByRole("link", { name: /Track Package/ });
+    expect(link.getAttribute("href")).toBe("https://www.google.com/search?q=XYZ123");
+    expect(screen.queryByText(/\(\)/)).not.toBeInTheDocument();
   });
 
   it("always renders the universal recovery footer with errorId", () => {
