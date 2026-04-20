@@ -81,7 +81,18 @@ export async function zohoFetch<T = unknown>(
     );
   }
 
-  const json = await response.json();
+  // Zoho returns 204 No Content for zero-match searches, most DELETEs, and
+  // some idempotent PUTs. response.json() throws on an empty body, so
+  // short-circuit. Callers use `response.data?.[0]` / `response.data ?? []`
+  // patterns that tolerate missing fields.
+  if (response.status === 204 || response.headers.get("content-length") === "0") {
+    return {} as T;
+  }
+  const text = await response.text();
+  if (!text) {
+    return {} as T;
+  }
+  const json = JSON.parse(text);
 
   if (typeof json === "object" && json !== null && "code" in json && (json as Record<string, unknown>).code !== 0) {
     const msg = (json as Record<string, unknown>).message ?? "Unknown Zoho error";

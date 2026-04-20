@@ -26,10 +26,9 @@ describe("zohoFetch", () => {
   });
 
   it("makes authenticated GET request with correct URL and headers", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ items: [] }),
-    } as Response);
+    mockFetch.mockResolvedValueOnce(
+      new Response(JSON.stringify({ items: [] }), { status: 200 }),
+    );
 
     const result = await zohoFetch("/inventory/v1/items");
 
@@ -48,10 +47,9 @@ describe("zohoFetch", () => {
   });
 
   it("makes POST request with JSON body", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ item: { id: "123" } }),
-    } as Response);
+    mockFetch.mockResolvedValueOnce(
+      new Response(JSON.stringify({ item: { id: "123" } }), { status: 200 }),
+    );
 
     const body = { name: "Test Item", rate: 100 };
     const result = await zohoFetch("/inventory/v1/items", {
@@ -72,10 +70,9 @@ describe("zohoFetch", () => {
   });
 
   it("appends query params to URL", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ items: [] }),
-    } as Response);
+    mockFetch.mockResolvedValueOnce(
+      new Response(JSON.stringify({ items: [] }), { status: 200 }),
+    );
 
     await zohoFetch("/inventory/v1/items", {
       params: { page: "1", per_page: "25" },
@@ -89,11 +86,9 @@ describe("zohoFetch", () => {
   });
 
   it("throws ZohoApiError on non-OK response", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: false,
-      status: 429,
-      text: async () => "Rate limit exceeded",
-    } as Response);
+    mockFetch.mockResolvedValueOnce(
+      new Response("Rate limit exceeded", { status: 429 }),
+    );
 
     await expect(zohoFetch("/inventory/v1/items")).rejects.toThrow(
       "Zoho API request failed",
@@ -101,10 +96,9 @@ describe("zohoFetch", () => {
   });
 
   it("uses correct org header for books paths", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ salesorders: [] }),
-    } as Response);
+    mockFetch.mockResolvedValueOnce(
+      new Response(JSON.stringify({ salesorders: [] }), { status: 200 }),
+    );
 
     await zohoFetch("/books/v3/salesorders");
 
@@ -117,10 +111,9 @@ describe("zohoFetch", () => {
   });
 
   it("uses correct org header for crm paths", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ data: [] }),
-    } as Response);
+    mockFetch.mockResolvedValueOnce(
+      new Response(JSON.stringify({ data: [] }), { status: 200 }),
+    );
 
     await zohoFetch("/crm/v6/Contacts");
 
@@ -133,10 +126,9 @@ describe("zohoFetch", () => {
   });
 
   it("throws on Zoho 200 response with error code", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ code: 57, message: "Not authorized" }),
-    } as Response);
+    mockFetch.mockResolvedValueOnce(
+      new Response(JSON.stringify({ code: 57, message: "Not authorized" }), { status: 200 }),
+    );
 
     await expect(zohoFetch("/inventory/v1/items")).rejects.toThrow(
       "Zoho API request failed",

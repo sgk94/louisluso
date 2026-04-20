@@ -47,4 +47,23 @@ describe("zohoFetch instrumentation", () => {
     const parsed = JSON.parse(arg);
     expect(parsed.status).toBe(429);
   });
+
+  it("returns an empty shape on 204 No Content (zero-match search)", async () => {
+    fetchSpy.mockResolvedValueOnce(new Response(null, { status: 204 }));
+    const result = await zohoFetch<{ data?: unknown[] }>(
+      "/crm/v6/Contacts/search",
+      { params: { email: "nobody@example.com" } },
+    );
+    expect(result).toEqual({});
+  });
+
+  it("returns an empty shape on 200 with empty body", async () => {
+    fetchSpy.mockResolvedValueOnce(
+      new Response("", { status: 200, headers: { "content-length": "0" } }),
+    );
+    const result = await zohoFetch<{ data?: unknown[] }>(
+      "/books/v3/contacts",
+    );
+    expect(result).toEqual({});
+  });
 });
